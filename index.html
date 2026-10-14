@@ -1,0 +1,707 @@
+<title>Orman Falcısı</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Mulish:wght@400;600;700&display=swap">
+<style>
+/* Layout: tek sütunlu mini uygulama; ekranlar sırayla değişir, altta sabit iki sekmeli menü var. */
+:root{
+  --bg:#0e0a1e;
+  --panel:#1a1432;
+  --panel-2:#251b47;
+  --line:#3b2f68;
+  --fg:#f2eafc;
+  --muted:#a99cc8;
+  --gold:#d8b86a;
+  --gold-ink:#2a1c05;
+  --violet:#8f68d8;
+  --rose:#ff8aa6;
+  --font-display:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --font-body:"Mulish",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  background-image:radial-gradient(ellipse 120% 60% at 50% -10%,rgba(143,104,216,.28),transparent 70%);
+  background-repeat:no-repeat;
+  color:var(--fg);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:20px 104px;
+}
+main{max-width:560px;margin:0 auto}
+h1,h2,h3{font-family:var(--font-display);font-weight:600;margin:0;text-wrap:balance;line-height:1.1}
+h1{font-size:46px;letter-spacing:.01em}
+h2{font-size:32px}
+h3{font-size:22px}
+p{margin:0}
+.muted{color:var(--muted)}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.scr[hidden]{display:none!important}
+.scr{display:flex;flex-direction:column;gap:18px;animation:in .45s ease both}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.btn{
+  min-height:46px;padding:0 20px;border-radius:12px;border:1px solid var(--line);
+  background:transparent;color:var(--fg);font:700 15px var(--font-body);cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn:hover{border-color:var(--gold)}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:var(--gold-ink)}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn:focus-visible,.pk:focus-visible,.flip:focus-visible,.lib:focus-visible,.opt:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>.btn{flex:1 1 160px}
+svg{display:block}
+
+/* Ana sayfa */
+.fan{position:relative;height:230px;margin:8px auto 0;width:100%;max-width:320px}
+.fan .c{position:absolute;left:50%;top:10px;width:116px;margin-left:-58px;transform-origin:50% 100%}
+.fan .c svg{width:100%;height:auto;border-radius:8px}
+.fan .c:nth-child(1){transform:rotate(-16deg) translateX(-54px)}
+.fan .c:nth-child(2){transform:translateY(-10px)}
+.fan .c:nth-child(3){transform:rotate(16deg) translateX(54px)}
+.hero-copy{display:flex;flex-direction:column;gap:12px;text-align:left}
+.hero-copy p{max-width:46ch}
+
+/* Karıştırma */
+.stack{position:relative;height:240px;width:140px;margin:20px auto 0}
+.stack .c{position:absolute;left:0;top:30px;width:140px}
+.stack .c svg{width:100%;height:auto;border-radius:8px}
+.stack .c:nth-child(odd){animation:riffleA 1.1s ease-in-out infinite}
+.stack .c:nth-child(even){animation:riffleB 1.1s ease-in-out infinite}
+.stack .c:nth-child(2){animation-delay:.12s}.stack .c:nth-child(3){animation-delay:.24s}.stack .c:nth-child(4){animation-delay:.36s}.stack .c:nth-child(5){animation-delay:.48s}
+@keyframes riffleA{0%,100%{transform:translateX(0) rotate(0)}50%{transform:translateX(-62px) rotate(-8deg)}}
+@keyframes riffleB{0%,100%{transform:translateX(0) rotate(0)}50%{transform:translateX(62px) rotate(8deg)}}
+.center{text-align:center;align-items:center}
+
+/* Kart sayısı */
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{
+  text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:14px 16px;color:var(--fg);cursor:pointer;display:flex;align-items:center;gap:16px;font-family:var(--font-body)
+}
+.opt:hover{border-color:var(--gold)}
+.opt .n{font-family:var(--font-display);font-size:44px;line-height:1;color:var(--gold);min-width:34px;text-align:center}
+.opt b{display:block;font-size:16px}
+.opt span{display:block;font-size:14px;color:var(--muted)}
+label{font-size:14px;color:var(--muted);display:block;margin-bottom:6px}
+input[type=text]{
+  width:100%;min-height:46px;border-radius:12px;border:1px solid var(--line);background:var(--panel);
+  color:var(--fg);padding:0 14px;font:400 16px var(--font-body)
+}
+input::placeholder{color:#7d70a0}
+
+/* Seçim */
+.bar{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.count{font-family:var(--font-display);font-size:28px;color:var(--gold)}
+.pgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.pk{position:relative;padding:0;border:0;background:none;cursor:pointer;border-radius:6px;transition:transform .15s}
+.pk svg{width:100%;height:auto;border-radius:5px}
+.pk:hover{transform:translateY(-2px)}
+.pk.sel{transform:translateY(-6px);outline:2px solid var(--gold);outline-offset:1px}
+.pk .bd{position:absolute;top:-7px;right:-5px;min-width:18px;height:18px;border-radius:9px;background:var(--gold);color:var(--gold-ink);font:700 11px/18px var(--font-body);text-align:center;display:none}
+.pk.sel .bd{display:block}
+.msg{min-height:22px;font-size:14px;color:var(--rose)}
+
+/* Sonuç */
+.items{display:flex;flex-direction:column;gap:14px}
+.item{display:flex;gap:16px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
+.flip{perspective:900px;flex:0 0 116px;width:116px;aspect-ratio:2/3;cursor:pointer;border-radius:8px}
+.fi{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.3,.7,.2,1)}
+.flip.open .fi{transform:rotateY(180deg)}
+.ff{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.ff.front{transform:rotateY(180deg)}
+.ff svg{width:100%;height:100%;border-radius:8px}
+.itxt{min-width:0;display:flex;flex-direction:column;gap:6px}
+.lbl{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.pre{color:var(--muted);font-size:15px}
+.name{font-family:var(--font-display);font-size:26px;line-height:1.1;font-weight:600}
+.kw{font-size:13px;font-weight:700;color:var(--gold)}
+.rev .kw{color:var(--rose)}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--rose);border:1px solid var(--rose);border-radius:999px;padding:1px 8px;margin-left:8px;vertical-align:middle}
+.mean{font-family:var(--font-display);font-size:20px;line-height:1.4;font-weight:500}
+.sum{background:var(--panel-2);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.sum{padding:20px 18px;gap:14px}
+.sum h3{font-size:30px;color:var(--gold)}
+.sum .mean{font-size:19px;line-height:1.6;animation:in .7s ease both}
+.sum .mean:last-child{color:var(--muted);font-style:italic}
+
+/* Kütüphane */
+.lgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 10px}
+.lib{background:none;border:0;padding:0;cursor:pointer;color:var(--fg);font:600 13px/1.25 var(--font-body);text-align:center;display:flex;flex-direction:column;gap:6px;border-radius:8px}
+.lib svg{width:100%;height:auto;border-radius:7px}
+.lib:hover svg{outline:2px solid var(--gold)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.seg button{min-height:42px;padding:0 22px;border:0;background:transparent;color:var(--muted);font:700 15px var(--font-body);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--gold);color:var(--gold-ink)}
+.seg button.r[aria-pressed="true"]{background:var(--rose)}
+.dcard{width:190px;max-width:60%;margin:0 auto}
+.dcard svg{width:100%;height:auto;border-radius:10px;transition:transform .5s}
+
+/* Alt menü */
+nav{
+  position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);
+  padding:8px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  display:flex;gap:8px;justify-content:center;z-index:5
+}
+nav .in{display:flex;gap:8px;width:100%;max-width:560px}
+nav button{flex:1;min-height:46px;border-radius:12px;border:0;background:transparent;color:var(--muted);font:700 15px var(--font-body);cursor:pointer}
+nav button[aria-current="page"]{background:var(--panel-2);color:var(--gold)}
+nav button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--gold);color:var(--gold-ink);font-weight:700;padding:10px 18px;border-radius:999px;z-index:9;font-size:14px}
+.toast[hidden]{display:none}
+@media (max-width:380px){h1{font-size:40px}.flip{flex-basis:100px;width:100px}.name{font-size:23px}}
+@media (prefers-reduced-motion:reduce){
+  .scr{animation:none}
+  .stack .c{animation:none!important}
+  .fi{transition:none}
+  .pk{transition:none}
+}
+</style>
+
+<main>
+  <section class="scr" id="s-home">
+    <div class="fan" aria-hidden="true"><div class="c"></div><div class="c"></div><div class="c"></div></div>
+    <div class="hero-copy">
+      <span class="eyebrow">46 kartlık orman destesi</span>
+      <h1 tabindex="-1">Orman Falcısı</h1>
+      <p class="muted">Niyetini tut, kartlarını seç, falcı anlatsın. Bazı kartlar ters gelir ve ters gelen kart aynı şeyi söylemez, bazen bir uyarı taşır.</p>
+    </div>
+    <div class="row">
+      <button class="btn primary" id="b-start">Fala başla</button>
+      <button class="btn" id="b-guide">Kartları tanı</button>
+    </div>
+  </section>
+
+  <section class="scr center" id="s-shuffle" hidden>
+    <span class="eyebrow">Birazdan başlıyoruz</span>
+    <h2 tabindex="-1">Kartlar karıştırılıyor</h2>
+    <div class="stack" aria-hidden="true"><div class="c"></div><div class="c"></div><div class="c"></div><div class="c"></div><div class="c"></div></div>
+    <p class="muted" role="status" id="shuffle-msg">Gözlerini kapat ve niyetini aklından geçir.</p>
+  </section>
+
+  <section class="scr" id="s-count" hidden>
+    <div>
+      <span class="eyebrow">Kartlar hazır</span>
+      <h2 tabindex="-1" style="margin-top:6px">Kaç kart çekeceksin?</h2>
+    </div>
+    <div>
+      <label for="q">Aklındaki soru (isteğe bağlı)</label>
+      <input type="text" id="q" maxlength="120" placeholder="Bu yıl işlerim nasıl gidecek?" autocomplete="off">
+    </div>
+    <div class="opts">
+      <button class="opt" data-n="1"><span class="n">1</span><div><b>Günün mesajı</b><span>Tek kart, kısa ve net bir cevap.</span></div></button>
+      <button class="opt" data-n="3"><span class="n">3</span><div><b>Geçmiş, şimdi, gelecek</b><span>Bir konunun üç zamanı.</span></div></button>
+      <button class="opt" data-n="5"><span class="n">5</span><div><b>Derin açılım</b><span>Ruh halin, engel, destek, tavsiye ve sonuç.</span></div></button>
+    </div>
+  </section>
+
+  <section class="scr" id="s-pick" hidden>
+    <div class="bar">
+      <div><span class="eyebrow">Kartlarını seç</span><h2 tabindex="-1" style="margin-top:6px" id="pick-title">3 kart seç</h2></div>
+      <div class="count" id="pick-count" aria-live="polite">0 / 3</div>
+    </div>
+    <div class="pgrid" id="pgrid"></div>
+    <p class="msg" id="pick-msg" role="status"></p>
+    <div class="row">
+      <button class="btn primary" id="b-reveal">Kartları aç</button>
+      <button class="btn" id="b-clear">Seçimi sıfırla</button>
+      <button class="btn" id="b-reshuffle">Tekrar karıştır</button>
+    </div>
+  </section>
+
+  <section class="scr" id="s-result" hidden>
+    <div>
+      <span class="eyebrow" id="r-q"></span>
+      <h2 tabindex="-1" style="margin-top:6px">Kartların</h2>
+      <p class="muted" style="margin-top:6px">Bir karta dokunarak çevir ya da hepsini birden aç.</p>
+    </div>
+    <div class="row"><button class="btn" id="b-all">Hepsini aç</button></div>
+    <div class="items" id="items"></div>
+    <div id="summary"></div>
+    <div class="row">
+      <button class="btn primary" id="b-copy">Sonucu kopyala</button>
+      <button class="btn" id="b-again">Yeniden fal bak</button>
+    </div>
+  </section>
+
+  <section class="scr" id="s-lib" hidden>
+    <div>
+      <span class="eyebrow">46 kart</span>
+      <h2 tabindex="-1" style="margin-top:6px">Kart rehberi</h2>
+      <p class="muted" style="margin-top:6px">Bir karta dokun, düz ve ters anlamını oku.</p>
+    </div>
+    <div class="lgrid" id="lgrid"></div>
+  </section>
+
+  <section class="scr" id="s-detail" hidden>
+    <div><button class="btn" id="b-back">Kartlara dön</button></div>
+    <div class="dcard" id="d-art"></div>
+    <div class="center" style="display:flex;justify-content:center"><div class="seg" role="group" aria-label="Kart yönü"><button id="d-up" aria-pressed="true">Düz</button><button id="d-rev" class="r" aria-pressed="false">Ters</button></div></div>
+    <div class="itxt" id="d-txt"></div>
+    <div class="row"><button class="btn" id="d-prev">Önceki kart</button><button class="btn" id="d-next">Sonraki kart</button></div>
+  </section>
+</main>
+
+<nav aria-label="Ana menü"><div class="in">
+  <button id="n-fal" aria-current="page">Fal</button>
+  <button id="n-lib">Kartlar</button>
+</div></nav>
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script>
+const rnd=s=>()=>(s=(s*9301+49297)%233280)/233280;
+const f=v=>Math.round(v*10)/10;
+function sky(i,a,b){
+  const r=rnd(i*7+3);let o='<defs><linearGradient id="sk'+i+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+a+'"/><stop offset="1" stop-color="'+b+'"/></linearGradient></defs><rect width="120" height="180" fill="url(#sk'+i+')"/>';
+  for(let k=0;k<30;k++){o+='<ellipse cx="'+f(r()*120)+'" cy="'+f(r()*170)+'" rx="'+f(8+r()*14)+'" ry="'+f(1.5+r()*2)+'" transform="rotate('+f(-25+r()*50)+' '+f(r()*120)+' '+f(r()*170)+')" fill="'+(k%3?'#fff':'#000')+'" fill-opacity="'+(k%3?0.05:0.09)+'"/>'}
+  return o;
+}
+function stars(seed,n,y1,col){const r=rnd(seed);let o='';for(let i=0;i<n;i++)o+='<circle cx="'+f(r()*114+3)+'" cy="'+f(r()*y1+4)+'" r="'+f(0.4+r()*0.9)+'" fill="'+col+'" fill-opacity="'+f(0.4+r()*0.6)+'"/>';return o}
+function pines(seed,col,yb,h,step){const r=rnd(seed);let o='';for(let x=-4;x<126;x+=step*(0.7+r()*0.6)){const hh=h*(0.7+r()*0.5),w=hh*0.32;o+='<path d="M'+f(x-w)+' '+yb+'L'+f(x)+' '+f(yb-hh)+'L'+f(x+w)+' '+yb+'Z" fill="'+col+'"/><path d="M'+f(x-w*0.7)+' '+f(yb-hh*0.4)+'L'+f(x)+' '+f(yb-hh*1.05)+'L'+f(x+w*0.7)+' '+f(yb-hh*0.4)+'Z" fill="'+col+'"/>'}return o+'<rect x="0" y="'+(yb-1)+'" width="120" height="'+(182-yb)+'" fill="'+col+'"/>'}
+function glow(cx,cy,r,c){return [1,0.75,0.5,0.3].map((k,i)=>'<circle cx="'+cx+'" cy="'+cy+'" r="'+f(r*k)+'" fill="'+c+'" fill-opacity="'+[0.1,0.16,0.24,0.5][i]+'"/>').join('')}
+function hill(c,y,a){return '<path d="M0 '+y+'Q30 '+(y-a)+' 60 '+y+'T120 '+y+'V180H0Z" fill="'+c+'"/>'}
+function sp(x,y,s,c){return '<path d="M'+x+' '+(y-s)+'Q'+x+' '+y+' '+(x+s)+' '+y+'Q'+x+' '+y+' '+x+' '+(y+s)+'Q'+x+' '+y+' '+(x-s)+' '+y+'Q'+x+' '+y+' '+x+' '+(y-s)+'Z" fill="'+c+'"/>'}
+function mist(c,ys){return ys.map((y,i)=>'<ellipse cx="'+(30+i*35)+'" cy="'+y+'" rx="'+(40+i*6)+'" ry="6" fill="'+c+'" fill-opacity="0.22"/>').join('')}
+function frame(a){return '<rect x="3" y="3" width="114" height="174" rx="7" fill="none" stroke="'+a+'" stroke-width="1.6"/><rect x="6.5" y="6.5" width="107" height="167" rx="5" fill="none" stroke="'+a+'" stroke-opacity="0.45" stroke-width="0.7"/><path d="M60 0l3 3-3 3-3-3zM60 174l3 3-3 3-3-3z" fill="'+a+'"/>'}
+function dots(seed,n,y0,y1,c,rr){const r=rnd(seed);let o='';for(let i=0;i<n;i++){const x=f(r()*110+5),y=f(y0+r()*(y1-y0));o+='<circle cx="'+x+'" cy="'+y+'" r="'+f(rr*2.6)+'" fill="'+c+'" fill-opacity="0.18"/><circle cx="'+x+'" cy="'+y+'" r="'+rr+'" fill="'+c+'"/>'}return o}
+function grass(seed,n,c,yb,h){const r=rnd(seed);let o='';for(let i=0;i<n;i++){const x=f(r()*120),hh=h*(0.5+r()*0.7);o+='<path d="M'+x+' '+yb+'Q'+f(x+(r()*8-4))+' '+f(yb-hh*0.6)+' '+f(x+(r()*10-5))+' '+f(yb-hh)+'" stroke="'+c+'" stroke-width="1.4" fill="none"/>'}return o}
+function hx(cx,cy,r,c){const p=[0,1,2,3,4,5].map(k=>f(cx+r*Math.cos(Math.PI/3*k+Math.PI/6))+','+f(cy+r*Math.sin(Math.PI/3*k+Math.PI/6))).join(' ');return '<polygon points="'+p+'" fill="'+c+'" stroke="#3a2404" stroke-width="1.2"/>'}
+const S=[
+()=>sky(0,'#1b1038','#4a2a78')+stars(1,40,100,'#fff')+glow(60,64,50,'#d9c2ff')+pines(2,'#2a1650',150,44,12)+'<path d="M60 62C40 30 12 36 14 62C16 78 40 78 60 66Z" fill="#b48cf0"/><path d="M60 62C80 30 108 36 106 62C104 78 80 78 60 66Z" fill="#b48cf0"/><path d="M60 68C44 70 28 88 36 106C46 110 58 92 60 74Z" fill="#8f68d8"/><path d="M60 68C76 70 92 88 84 106C74 110 62 92 60 74Z" fill="#8f68d8"/><path d="M20 58Q34 44 52 60M100 58Q86 44 68 60" stroke="#e6d4ff" stroke-width="1" fill="none"/><circle cx="34" cy="55" r="7" fill="#ffe9a8"/><circle cx="34" cy="55" r="3.5" fill="#4a2a78"/><circle cx="86" cy="55" r="7" fill="#ffe9a8"/><circle cx="86" cy="55" r="3.5" fill="#4a2a78"/><circle cx="24" cy="70" r="2" fill="#ffe9a8"/><circle cx="96" cy="70" r="2" fill="#ffe9a8"/><ellipse cx="60" cy="74" rx="3.5" ry="17" fill="#2a1650"/><circle cx="60" cy="56" r="4" fill="#2a1650"/><path d="M58 53Q52 40 46 36M62 53Q68 40 74 36" stroke="#2a1650" stroke-width="1.5" fill="none"/>'+pines(3,'#120a26',184,58,26)+sp(20,30,3,'#fff')+sp(98,26,2.5,'#fff'),
+()=>sky(1,'#0e1a3a','#1d3a5c')+stars(4,34,90,'#fff')+pines(5,'#14283f',140,46,13)+'<path d="M-5 26Q40 16 80 32T130 28" stroke="#2a1c14" stroke-width="6" fill="none"/><path d="M30 24Q24 36 14 38M96 30Q102 40 112 38" stroke="#2a1c14" stroke-width="2.5" fill="none"/><path d="M70 30V56" stroke="#1a1008" stroke-width="1.5"/>'+glow(70,80,42,'#ffd77a')+'<path d="M63 56H77L79 60H61Z" fill="#3a2410"/><rect x="62" y="60" width="16" height="26" rx="3" fill="#6a4420"/><rect x="65" y="63" width="10" height="20" rx="2" fill="#ffe9a8"/><path d="M70 63V83M65 73H75" stroke="#6a4420" stroke-width="1"/><path d="M61 86H79L77 91H63Z" fill="#3a2410"/>'+dots(6,10,50,130,'#f0f58a',0.9)+pines(7,'#091522',180,50,22)+grass(8,26,'#050d16',180,26),
+()=>sky(2,'#15301f','#3d6a48')+stars(9,22,60,'#fff')+glow(90,36,34,'#f2f0c8')+'<circle cx="90" cy="36" r="12" fill="#f4f2cc"/><circle cx="86" cy="33" r="2.5" fill="#d8d6a8"/><circle cx="94" cy="40" r="2" fill="#d8d6a8"/>'+pines(10,'#1a3a26',112,50,12)+'<rect x="0" y="118" width="120" height="62" fill="#2a5a7a"/><path d="M0 130Q20 126 40 130T80 130T120 130M0 146Q20 142 40 146T80 146T120 146M0 162Q20 158 40 162T80 162T120 162" stroke="#7ab8d0" stroke-width="1" fill="none"/><path d="M8 118Q60 66 112 118L112 128Q60 80 8 128Z" fill="#8c8a78"/><path d="M0 114H120V120H0Z" fill="#6a6858"/><path d="M22 96V116M40 82V116M60 78V116M80 82V116M98 96V116" stroke="#5a5848" stroke-width="2"/><path d="M0 108Q14 112 14 134M120 108Q106 112 106 134M0 120Q8 130 4 150" stroke="#3a2616" stroke-width="3.5" fill="none"/><path d="M14 134Q10 144 16 154M106 134Q112 146 104 156" stroke="#3a2616" stroke-width="2" fill="none"/>'+hill('#0f2216',166,10)+dots(11,6,100,150,'#f0f58a',0.8),
+()=>sky(3,'#1c2208','#3a4a12')+stars(12,18,60,'#f0f0b0')+glow(60,80,52,'#f0f58a')+hill('#2a3a0c',120,16)+hill('#1a2606',146,12)+dots(13,22,40,140,'#f0f58a',1.1)+'<ellipse cx="60" cy="82" rx="5" ry="8" fill="#2a2a0a"/><ellipse cx="60" cy="88" rx="4" ry="5" fill="#f4ff90"/><ellipse cx="51" cy="74" rx="9" ry="4" transform="rotate(-30 51 74)" fill="#fff" fill-opacity="0.7"/><ellipse cx="69" cy="74" rx="9" ry="4" transform="rotate(30 69 74)" fill="#fff" fill-opacity="0.7"/>'+grass(14,60,'#0a1002',180,44)+grass(15,30,'#050800',182,60),
+()=>sky(4,'#20223a','#4a4d78')+stars(16,26,70,'#fff')+'<path d="M0 0H120V180H0Z" fill="#2a1f2a" fill-opacity="0.55"/><path d="M0 0Q10 60 4 180H0ZM120 0Q110 60 116 180H120Z" fill="#1a1220"/>'+glow(60,104,44,'#fff2c0')+'<path d="M40 142V86Q40 50 60 50Q80 50 80 86V142Z" fill="#3a2a30"/><path d="M44 142V87Q44 55 60 55Q76 55 76 87V142Z" fill="#ffe9b0"/><path d="M50 142V90Q50 66 60 66Q70 66 70 90V142Z" fill="#fff6d8"/><path d="M34 146H86L90 156H30Z" fill="#4a3a48"/><path d="M28 156H92L96 166H24Z" fill="#3a2c3a"/>'+mist('#d8dcff',[128,146,164])+sp(24,44,3,'#fff')+sp(96,58,2.5,'#ffe9b0')+sp(18,110,2,'#ffe9b0')+dots(17,6,60,150,'#fff6d8',0.7),
+()=>sky(5,'#0b2a36','#2a6a7a')+stars(18,30,60,'#fff')+glow(60,30,30,'#e8f6ff')+'<circle cx="60" cy="30" r="13" fill="#eaf8ff"/><path d="M0 40Q20 50 30 80Q34 120 0 140Z" fill="#12303a"/><path d="M120 36Q100 48 92 84Q88 120 120 140Z" fill="#12303a"/><path d="M52 56H68L72 118H48Z" fill="#cfeef8" fill-opacity="0.85"/><path d="M56 60V116M62 58V118M66 60V116" stroke="#fff" stroke-width="1.2"/><ellipse cx="60" cy="140" rx="46" ry="14" fill="#7ad0e0"/><ellipse cx="60" cy="140" rx="30" ry="8" fill="#a6e8f4"/><ellipse cx="60" cy="140" rx="18" ry="4.5" fill="none" stroke="#fff" stroke-width="0.8"/><ellipse cx="60" cy="140" rx="10" ry="2.5" fill="none" stroke="#fff" stroke-width="0.8"/><ellipse cx="82" cy="148" rx="6" ry="1.5" fill="#fff" fill-opacity="0.5"/>'+hill('#0a2028',164,8)+grass(19,22,'#06141a',176,30)+dots(20,8,100,150,'#bff4ff',0.8),
+()=>sky(6,'#2a1a10','#6a3a20')+stars(21,16,40,'#ffe9c0')+glow(60,62,56,'#f4d9a0')+'<circle cx="60" cy="62" r="38" fill="#f6dfb0"/><circle cx="46" cy="50" r="6" fill="#e0c690"/><circle cx="76" cy="74" r="8" fill="#e0c690"/><circle cx="72" cy="46" r="3.5" fill="#e0c690"/>'+pines(22,'#2a160c',150,40,13)+'<path d="M-5 124Q40 116 80 126T130 120" stroke="#1a0e08" stroke-width="7" fill="none"/><ellipse cx="60" cy="100" rx="17" ry="24" fill="#5a3a24"/><path d="M44 96Q40 112 50 120L54 100ZM76 96Q80 112 70 120L66 100Z" fill="#3a2414"/><ellipse cx="60" cy="108" rx="9" ry="14" fill="#c9a070"/><path d="M54 100l3 3 3-3 3 3 3-3M54 108l3 3 3-3 3 3 3-3M55 116l3 3 3-3 3 3" stroke="#8a6a44" stroke-width="1" fill="none"/><circle cx="60" cy="78" r="15" fill="#5a3a24"/><path d="M47 70L45 58L55 65ZM73 70L75 58L65 65Z" fill="#5a3a24"/><circle cx="54" cy="77" r="6" fill="#ffe08a"/><circle cx="66" cy="77" r="6" fill="#ffe08a"/><circle cx="54" cy="77" r="2.6" fill="#1a1008"/><circle cx="66" cy="77" r="2.6" fill="#1a1008"/><path d="M57 82L60 88L63 82Z" fill="#e0a850"/><path d="M52 122l-2 5M56 123l-1 5M64 123l1 5M68 122l2 5" stroke="#c9a070" stroke-width="1.5"/>'+pines(23,'#120a06',184,52,26),
+()=>sky(7,'#2a1040','#5a2a70')+stars(24,44,110,'#fff')+glow(60,70,52,'#f5a8ff')+'<path d="M60 40l6 14 15 1.5-11.5 10 3.5 15-13-8-13 8 3.5-15L39 55.5 54 54Z" fill="#ffe9ff"/><path d="M52 52Q30 38 6 14M56 46Q40 30 24 8" stroke="#f5a8ff" stroke-width="2" fill="none" stroke-opacity="0.6"/>'+hill('#2a4a3a',138,22)+hill('#1a3226',158,14)+'<path d="M60 160V122" stroke="#8fe09a" stroke-width="2.5" fill="none"/><path d="M60 140Q76 138 82 126Q66 124 60 140Z" fill="#8fe09a"/><path d="M60 148Q44 146 38 134Q54 132 60 148Z" fill="#6cc87a"/><path d="M60 122Q68 112 62 104Q54 112 60 122Z" fill="#b8f4c0"/>'+glow(60,126,18,'#f5ffb0')+dots(25,12,80,150,'#ffe9ff',0.8)+grass(26,30,'#0a1a12',180,22),
+()=>sky(8,'#2a0f18','#5a2030')+stars(27,20,60,'#ffd0d8')+glow(60,100,44,'#ffc8d0')+'<circle cx="60" cy="100" r="22" fill="#ffdde2"/><path d="M20 176Q12 70 60 48Q108 70 100 176" stroke="#1a0a0e" stroke-width="7" fill="none"/><path d="M26 176Q20 90 60 60Q100 90 94 176" stroke="#2a1218" stroke-width="3" fill="none"/><path d="M18 150l-6-3 6-3M20 120l-7-1 6-5M26 92l-6-4 7-2M44 62l-3-6 6 1M76 62l3-6-6 1M96 92l7-3-7-4M100 120l7 0-6-5M102 150l6-3-6-3" stroke="#1a0a0e" stroke-width="1.8" fill="none"/><circle cx="60" cy="50" r="9" fill="#d84060"/><circle cx="60" cy="50" r="6" fill="#b82c4a"/><circle cx="60" cy="50" r="3" fill="#d84060"/><circle cx="30" cy="94" r="7" fill="#d84060"/><circle cx="30" cy="94" r="4" fill="#b82c4a"/><circle cx="92" cy="110" r="6" fill="#d84060"/><circle cx="92" cy="110" r="3.5" fill="#b82c4a"/><path d="M48 54Q40 48 38 56ZM72 54Q80 48 82 56ZM24 104Q16 100 16 108ZM96 120Q104 116 104 124Z" fill="#3a5a30"/>'+hill('#14080c',166,8)+sp(34,36,2.5,'#fff')+sp(92,40,2,'#fff'),
+()=>sky(9,'#1a2a3a','#3a5a78')+'<ellipse cx="30" cy="26" rx="30" ry="12" fill="#6a7a90"/><ellipse cx="70" cy="20" rx="34" ry="13" fill="#7a8aa0"/><ellipse cx="100" cy="30" rx="26" ry="11" fill="#5a6a80"/><ellipse cx="60" cy="34" rx="40" ry="10" fill="#5a6a80"/>'+(()=>{const r=rnd(31);let o='';for(let i=0;i<44;i++){const x=f(r()*130-5),y=f(40+r()*110);o+='<path d="M'+x+' '+y+'l-3 9" stroke="#cfe4ff" stroke-width="1" stroke-opacity="'+f(0.35+r()*0.5)+'"/>'}return o})()+hill('#1a3a30',138,14)+'<ellipse cx="60" cy="152" rx="30" ry="7" fill="#7aa8c8"/><ellipse cx="60" cy="152" rx="14" ry="3" fill="none" stroke="#fff" stroke-width="0.8"/><ellipse cx="60" cy="152" rx="22" ry="5" fill="none" stroke="#fff" stroke-width="0.6" stroke-opacity="0.6"/><rect x="56" y="104" width="8" height="40" rx="3" fill="#e8dcc0"/><path d="M30 106Q30 76 60 76Q90 76 90 106Q60 100 30 106Z" fill="#c04050"/><circle cx="46" cy="90" r="4" fill="#fff"/><circle cx="64" cy="84" r="5" fill="#fff"/><circle cx="76" cy="96" r="3.5" fill="#fff"/><circle cx="56" cy="99" r="2.5" fill="#fff"/>'+grass(32,34,'#0a1c16',180,24),
+()=>sky(10,'#14102a','#2a2060')+stars(33,30,90,'#d8c4ff')+glow(60,118,56,'#b898ff')+'<polygon points="46,150 52,100 58,150" fill="#8a6ae0"/><polygon points="58,150 66,70 76,150" fill="#d8c4ff"/><polygon points="66,70 76,150 70,150" fill="#b898ff"/><polygon points="76,150 82,106 90,150" fill="#6a8aff"/><polygon points="34,150 38,118 46,150" fill="#b898ff"/><polygon points="90,150 96,126 102,150" fill="#8a6ae0"/><path d="M60 150L64 96M66 76L70 148" stroke="#fff" stroke-width="1" stroke-opacity="0.7"/><path d="M0 0H120V58Q90 28 60 34Q30 28 0 58Z" fill="#0c0818"/><path d="M0 0H18V130Q6 100 0 70ZM120 0H102V130Q114 100 120 70Z" fill="#0c0818"/><path d="M0 150Q60 130 120 150V180H0Z" fill="#0c0818"/>'+sp(24,80,2.5,'#d8c4ff')+sp(98,92,3,'#fff')+sp(56,60,2,'#fff')+dots(34,6,90,140,'#d8c4ff',0.8),
+()=>sky(11,'#4a2a40','#ff9a5a')+glow(60,114,60,'#ffe08a')+'<path d="M30 114A30 30 0 0 1 90 114Z" fill="#ffe08a"/><path d="M60 70V56M36 80L28 70M84 80L92 70M22 100H10M98 100H110" stroke="#ffe08a" stroke-width="2" stroke-opacity="0.8"/>'+hill('#c0603a',122,14)+hill('#8a3a30',142,12)+hill('#4a2030',162,10)+'<path d="M60 176V96" stroke="#2a5a30" stroke-width="3" fill="none"/><path d="M60 148Q80 146 88 132Q68 130 60 148Z" fill="#3a7a40"/><path d="M60 158Q40 156 32 142Q52 140 60 158Z" fill="#2a5a30"/>'+[0,45,90,135,180,225,270,315].map(a=>'<ellipse cx="60" cy="72" rx="5" ry="12" transform="rotate('+a+' 60 84)" fill="'+(a%90?'#ffb080':'#ffd0a0')+'"/>').join('')+'<circle cx="60" cy="84" r="7" fill="#e0603a"/><circle cx="60" cy="84" r="3" fill="#ffe08a"/>'+sp(24,56,3,'#fff')+sp(100,64,2.5,'#fff')+sp(90,40,2,'#ffe08a')
+];
+const MO={
+sun:(p,q)=>'<g stroke="'+p+'" stroke-width="2.5" stroke-linecap="round">'+[...Array(12)].map((_,i)=>'<path d="M60 58V47" transform="rotate('+i*30+' 60 88)"/>').join('')+'</g><circle cx="60" cy="88" r="19" fill="'+p+'"/><circle cx="60" cy="88" r="12" fill="'+q+'"/>',
+well:(p,q)=>'<path d="M40 106V70M80 106V70" stroke="#3a3040" stroke-width="3"/><path d="M34 72L60 58L86 72Z" fill="#4a3a50"/><rect x="38" y="104" width="44" height="34" fill="#6a6478"/><path d="M38 116H82M38 128H82M52 104V116M68 116V128M50 128V138" stroke="#4a4458" stroke-width="1"/><ellipse cx="60" cy="104" rx="22" ry="7" fill="#2a2434"/><ellipse cx="60" cy="104" rx="16" ry="4.5" fill="'+p+'"/>'+sp(60,88,5,'#fff')+sp(48,50,2.5,p)+sp(74,46,2.5,p),
+lake:(p,q)=>'<circle cx="60" cy="58" r="15" fill="'+p+'"/><ellipse cx="60" cy="122" rx="56" ry="24" fill="'+q+'"/><path d="M50 112H70M46 118H74M50 124H70M54 130H66" stroke="'+p+'" stroke-width="1.6" stroke-linecap="round"/><path d="M20 128V108M24 128V112M98 132V110M102 132V114" stroke="#0c1a14" stroke-width="2"/>',
+book:(p,q)=>'<path d="M60 100L20 88V126L60 138Z" fill="'+p+'"/><path d="M60 100L100 88V126L60 138Z" fill="'+q+'"/><path d="M60 100V138" stroke="#2a1a3a" stroke-width="1.5"/><path d="M28 96L54 104M28 104L54 112M28 112L54 120M66 104L92 96M66 112L92 104M66 120L92 112" stroke="#2a1a3a" stroke-width="1" stroke-opacity="0.6"/><path d="M16 90V130L60 142L104 130V90" fill="none" stroke="#2a1a3a" stroke-width="3"/>'+sp(60,76,6,'#fff')+sp(44,66,3,p)+sp(78,62,3,p)+sp(60,52,2,'#fff'),
+key:(p,q)=>'<circle cx="44" cy="62" r="13" fill="none" stroke="'+p+'" stroke-width="5"/><circle cx="44" cy="62" r="5" fill="'+q+'"/><path d="M53 71L90 118" stroke="'+p+'" stroke-width="5" stroke-linecap="round"/><path d="M80 106L88 98M88 116L96 108" stroke="'+p+'" stroke-width="5" stroke-linecap="round"/>'+sp(30,100,3,p)+sp(96,70,3,p),
+mirror:(p,q)=>'<ellipse cx="60" cy="88" rx="26" ry="38" fill="'+q+'" stroke="'+p+'" stroke-width="4"/><path d="M52 54L62 76L54 96L66 122M62 76L78 82" stroke="#fff" stroke-width="1.4" fill="none"/><path d="M44 78Q46 62 56 56" stroke="#fff" stroke-width="2" stroke-opacity="0.5" fill="none"/><rect x="56" y="126" width="8" height="12" fill="'+p+'"/>',
+fox:(p,q)=>'<ellipse cx="86" cy="122" rx="24" ry="9" transform="rotate(-35 86 122)" fill="'+p+'"/><circle cx="102" cy="104" r="5" fill="#fff"/><path d="M38 140Q32 112 50 104Q70 100 74 120L80 140Z" fill="'+p+'"/><circle cx="48" cy="94" r="11" fill="'+p+'"/><path d="M39 88L37 72L49 83ZM57 86L62 72L51 83Z" fill="'+p+'"/><path d="M40 98L29 101L40 106Z" fill="'+p+'"/><circle cx="46" cy="92" r="1.8" fill="#1a0a04"/><path d="M42 120Q52 130 66 126" stroke="#fff" stroke-width="3" fill="none"/>',
+wolf:(p,q)=>'<path d="M16 150L38 126H86L106 150Z" fill="#14101c"/><path d="M42 128Q46 100 62 96Q76 96 82 110L86 128Z" fill="'+p+'"/><path d="M58 100Q52 82 46 72L40 56L50 62L56 70L66 62Q74 82 70 100Z" fill="'+p+'"/><path d="M46 72L32 62L46 60Z" fill="'+p+'"/><path d="M86 120Q104 112 108 98" stroke="'+p+'" stroke-width="6" fill="none" stroke-linecap="round"/>',
+stag:(p,q)=>'<path d="M44 140Q46 116 54 106L66 106Q74 116 76 140Z" fill="'+p+'"/><ellipse cx="60" cy="96" rx="9" ry="13" fill="'+p+'"/><path d="M54 86L48 78M66 86L72 78" stroke="'+p+'" stroke-width="3"/><g stroke="'+q+'" stroke-width="2.2" fill="none" stroke-linecap="round"><path d="M54 88Q42 70 36 52M45 72Q34 70 28 62M42 62Q38 52 40 44M50 78Q46 66 50 56"/><path d="M66 88Q78 70 84 52M75 72Q86 70 92 62M78 62Q82 52 80 44M70 78Q74 66 70 56"/></g><circle cx="56" cy="95" r="1.6" fill="#fff"/><circle cx="64" cy="95" r="1.6" fill="#fff"/>',
+raven:(p,q)=>'<path d="M-5 120Q40 112 80 122T130 118" stroke="#1a0e08" stroke-width="6" fill="none"/><ellipse cx="60" cy="104" rx="16" ry="11" fill="'+p+'" transform="rotate(-12 60 104)"/><circle cx="76" cy="92" r="8" fill="'+p+'"/><path d="M83 90L94 94L83 97Z" fill="'+q+'"/><path d="M46 108L22 124L48 116Z" fill="'+p+'"/><circle cx="78" cy="90" r="1.8" fill="'+q+'"/><path d="M52 104Q62 98 72 106" stroke="'+q+'" stroke-width="1" fill="none"/><path d="M58 114L56 122M64 115L64 122" stroke="'+q+'" stroke-width="1.5"/>',
+hare:(p,q)=>'<ellipse cx="58" cy="122" rx="20" ry="16" fill="'+p+'"/><circle cx="76" cy="104" r="11" fill="'+p+'"/><path d="M72 96L66 66L76 94ZM78 94L86 66L84 96Z" fill="'+p+'"/><circle cx="38" cy="126" r="6" fill="'+q+'"/><circle cx="80" cy="102" r="1.8" fill="#1a1a2a"/><path d="M66 134L84 136" stroke="'+p+'" stroke-width="5" stroke-linecap="round"/>',
+ouro:(p,q)=>'<circle cx="60" cy="88" r="30" fill="none" stroke="'+p+'" stroke-width="9"/><circle cx="60" cy="88" r="30" fill="none" stroke="'+q+'" stroke-width="2" stroke-dasharray="3 5"/><path d="M62 50L74 54L66 62Z" fill="'+p+'"/><circle cx="66" cy="54" r="1.6" fill="'+q+'"/><circle cx="60" cy="88" r="18" fill="'+q+'" fill-opacity="0.35"/>'+sp(60,88,8,'#fff'),
+turtle:(p,q)=>'<path d="M26 120Q26 84 60 84Q94 84 94 120Z" fill="'+p+'"/><path d="M40 118L46 100L60 96L74 100L80 118M46 100L40 118M60 96V118" stroke="'+q+'" stroke-width="1.8" fill="none"/><ellipse cx="98" cy="108" rx="9" ry="7" fill="'+q+'"/><circle cx="101" cy="106" r="1.4" fill="#000"/><path d="M34 120L28 132M52 120L50 132M70 120L72 132M86 120L92 130" stroke="'+q+'" stroke-width="5" stroke-linecap="round"/><path d="M26 120H94" stroke="'+q+'" stroke-width="3"/>',
+fish:(p,q)=>'<path d="M24 92Q60 56 92 92Q60 128 24 92Z" fill="'+p+'"/><path d="M92 92L110 76V108Z" fill="'+q+'"/><path d="M46 84Q60 80 76 84M44 92Q60 88 80 92M46 100Q60 98 76 100" stroke="'+q+'" stroke-width="1" fill="none"/><circle cx="40" cy="88" r="3" fill="#0a1a2a"/><circle cx="38" cy="87" r="1" fill="#fff"/><circle cx="30" cy="70" r="3" fill="none" stroke="#fff" stroke-width="1"/><circle cx="36" cy="58" r="2" fill="none" stroke="#fff" stroke-width="1"/><path d="M10 132Q35 126 60 132T110 132" stroke="'+p+'" stroke-width="1.2" fill="none"/>',
+hex:(p,q)=>[[60,84],[82.5,84],[37.5,84],[71.2,64.5],[48.8,64.5],[71.2,103.5],[48.8,103.5]].map((a,i)=>hx(a[0],a[1],13,i%2?p:q)).join('')+'<ellipse cx="94" cy="50" rx="6" ry="4.5" fill="'+p+'"/><path d="M90 48V53M94 46V54M98 48V53" stroke="#1a1004" stroke-width="1.5"/><ellipse cx="90" cy="42" rx="5" ry="3" fill="#fff" fill-opacity="0.7"/>',
+swan:(p,q)=>'<ellipse cx="60" cy="130" rx="40" ry="6" fill="'+q+'" fill-opacity="0.5"/><path d="M34 118Q34 134 60 134Q88 134 94 114Q80 122 60 118Z" fill="'+p+'"/><path d="M40 112Q24 96 34 74Q40 60 54 62" stroke="'+p+'" stroke-width="8" fill="none" stroke-linecap="round"/><circle cx="56" cy="64" r="7" fill="'+p+'"/><path d="M62 64L72 68L62 69Z" fill="#e0805a"/><circle cx="57" cy="62" r="1.4" fill="#000"/><path d="M46 112Q62 100 84 114" stroke="'+q+'" stroke-width="1.5" fill="none"/>',
+dove:(p,q)=>'<path d="M60 98Q36 62 8 70Q30 76 44 98Z" fill="'+p+'"/><path d="M60 98Q84 62 112 70Q90 76 76 98Z" fill="'+p+'"/><path d="M60 98Q40 80 20 82M60 98Q80 80 100 82" stroke="'+q+'" stroke-width="1" fill="none"/><ellipse cx="60" cy="108" rx="9" ry="14" fill="'+p+'"/><circle cx="60" cy="90" r="6" fill="'+p+'"/><path d="M58 92L54 97L62 94Z" fill="#e0a050"/><path d="M50 128Q60 142 70 128L60 120Z" fill="'+p+'"/><path d="M56 96Q46 100 40 108" stroke="#4a9858" stroke-width="2" fill="none"/><ellipse cx="42" cy="106" rx="4" ry="2" fill="#4a9858"/>',
+bell:(p,q)=>'<path d="M60 44V56" stroke="'+q+'" stroke-width="3"/><path d="M34 112Q36 72 60 62Q84 72 86 112L94 118H26Z" fill="'+p+'"/><path d="M44 108Q46 82 60 74" stroke="#fff" stroke-width="2" stroke-opacity="0.6" fill="none"/><circle cx="60" cy="124" r="6" fill="'+q+'"/><path d="M20 80Q14 94 20 108M100 80Q106 94 100 108M12 72Q4 94 12 116M108 72Q116 94 108 116" stroke="'+p+'" stroke-width="1.5" fill="none" stroke-opacity="0.8"/>',
+sword:(p,q)=>'<path d="M24 150Q28 118 60 114Q92 118 96 150Z" fill="#4a4a5a"/><path d="M50 122Q60 118 70 122" stroke="#3a3a48" stroke-width="2" fill="none"/><path d="M57 118V54L60 46L63 54V118Z" fill="'+p+'"/><rect x="44" y="90" width="32" height="5" rx="2" fill="'+q+'"/><rect x="58" y="94" width="4" height="12" fill="'+q+'"/><circle cx="60" cy="108" r="3.5" fill="'+q+'"/>'+sp(60,38,5,'#fff'),
+crown:(p,q)=>'<path d="M30 118L24 70L44 92L60 62L76 92L96 70L90 118Z" fill="'+p+'"/><rect x="30" y="118" width="60" height="9" rx="2" fill="'+q+'"/><circle cx="24" cy="68" r="4" fill="'+q+'"/><circle cx="60" cy="60" r="4.5" fill="'+q+'"/><circle cx="96" cy="68" r="4" fill="'+q+'"/><circle cx="44" cy="122" r="2.5" fill="#fff"/><circle cx="60" cy="122" r="2.5" fill="#ff7a90"/><circle cx="76" cy="122" r="2.5" fill="#fff"/>',
+hearttree:(p,q)=>'<path d="M56 140Q56 118 58 100H62Q64 118 64 140ZM60 112Q46 104 38 94M60 108Q74 100 82 90" stroke="#3a2616" stroke-width="5" fill="#3a2616"/><circle cx="60" cy="72" r="26" fill="'+q+'"/><circle cx="40" cy="84" r="15" fill="'+q+'"/><circle cx="80" cy="84" r="15" fill="'+q+'"/><path d="M60 88Q46 76 52 68Q58 62 60 70Q62 62 68 68Q74 76 60 88Z" fill="'+p+'"/>'+sp(30,60,2.5,p)+sp(92,64,2.5,p),
+wheel:(p,q)=>'<circle cx="60" cy="88" r="32" fill="none" stroke="'+p+'" stroke-width="4"/><circle cx="60" cy="88" r="22" fill="none" stroke="'+q+'" stroke-width="1.5"/><g stroke="'+p+'" stroke-width="2.5">'+[0,45,90,135].map(a=>'<path d="M60 56V120" transform="rotate('+a+' 60 88)"/>').join('')+'</g><g fill="'+q+'">'+[0,45,90,135,180,225,270,315].map(a=>'<circle cx="60" cy="52" r="3" transform="rotate('+a+' 60 88)"/>').join('')+'</g><circle cx="60" cy="88" r="7" fill="'+p+'"/><circle cx="60" cy="88" r="3" fill="'+q+'"/>',
+wind:(p,q)=>'<g fill="none" stroke="'+p+'" stroke-width="2.5" stroke-linecap="round"><path d="M14 70Q50 56 70 70Q86 82 72 90Q60 94 60 84"/><path d="M10 100Q46 90 76 100Q96 110 82 120Q70 124 70 114"/><path d="M30 130Q60 124 84 132"/></g><path d="M92 62Q104 56 108 66Q98 72 92 62Z" fill="'+q+'"/><path d="M20 112Q30 104 36 112Q28 120 20 112Z" fill="'+q+'"/><path d="M96 98Q106 92 112 100Q104 108 96 98Z" fill="'+q+'"/>',
+bolt:(p,q)=>'<ellipse cx="40" cy="52" rx="22" ry="11" fill="#4a4a6a"/><ellipse cx="70" cy="46" rx="26" ry="13" fill="#5a5a7a"/><ellipse cx="92" cy="56" rx="18" ry="9" fill="#4a4a6a"/><path d="M66 56L46 94H62L52 130L84 86H66L78 56Z" fill="'+p+'"/><path d="M66 56L46 94H62L52 130" stroke="'+q+'" stroke-width="1.2" fill="none"/>',
+shrooms:(p,q)=>[[40,128,16,p],[66,120,22,q],[88,132,12,p]].map(a=>'<rect x="'+(a[0]-3)+'" y="'+f(a[1]-a[2]*0.4)+'" width="6" height="'+f(a[2]*0.9)+'" fill="#e8dcc0"/><path d="M'+(a[0]-a[2])+' '+f(a[1]-a[2]*0.3)+'Q'+a[0]+' '+f(a[1]-a[2]*1.8)+' '+(a[0]+a[2])+' '+f(a[1]-a[2]*0.3)+'Z" fill="'+a[3]+'"/><circle cx="'+f(a[0]-a[2]*0.3)+'" cy="'+f(a[1]-a[2]*0.7)+'" r="'+f(a[2]*0.14)+'" fill="#fff"/><circle cx="'+f(a[0]+a[2]*0.35)+'" cy="'+f(a[1]-a[2]*0.55)+'" r="'+f(a[2]*0.1)+'" fill="#fff"/>').join('')+'<ellipse cx="62" cy="142" rx="44" ry="4" fill="none" stroke="'+p+'" stroke-width="1" stroke-dasharray="2 4"/>'+sp(30,90,3,p)+sp(96,100,2.5,p),
+hourglass:(p,q)=>'<rect x="34" y="52" width="52" height="6" rx="2" fill="'+q+'"/><rect x="34" y="122" width="52" height="6" rx="2" fill="'+q+'"/><path d="M40 58H80Q80 82 60 90Q40 82 40 58ZM40 122H80Q80 98 60 90Q40 98 40 122Z" fill="'+p+'" fill-opacity="0.25" stroke="'+p+'" stroke-width="2"/><path d="M48 62H72Q70 74 60 80Q50 74 48 62Z" fill="'+p+'"/><path d="M60 82V112" stroke="'+p+'" stroke-width="1.6"/><path d="M46 122Q60 100 74 122Z" fill="'+p+'"/>'+sp(26,70,3,p)+sp(96,110,3,p),
+traveler:(p,q)=>glow(86,106,20,q)+'<path d="M60 76L40 138H80Z" fill="'+p+'"/><circle cx="60" cy="70" r="8" fill="'+p+'"/><path d="M52 66Q60 54 68 66Z" fill="'+p+'"/><path d="M86 72V140" stroke="#2a1a10" stroke-width="2.5"/><path d="M76 98L86 96" stroke="'+p+'" stroke-width="3"/><rect x="82" y="100" width="9" height="12" rx="2" fill="'+q+'"/>'+sp(30,60,3,q)+sp(100,50,2.5,q),
+fairy:(p,q)=>'<g fill="'+q+'" fill-opacity="0.75"><ellipse cx="42" cy="78" rx="16" ry="8" transform="rotate(-30 42 78)"/><ellipse cx="78" cy="78" rx="16" ry="8" transform="rotate(30 78 78)"/><ellipse cx="46" cy="94" rx="11" ry="6" transform="rotate(25 46 94)"/><ellipse cx="74" cy="94" rx="11" ry="6" transform="rotate(-25 74 94)"/></g><path d="M60 84L50 118H70Z" fill="'+p+'"/><circle cx="60" cy="78" r="6" fill="#ffe0d0"/><path d="M54 74Q60 66 66 74Q60 70 54 74Z" fill="#3a2010"/><path d="M52 118L50 130M68 118L70 130" stroke="#ffe0d0" stroke-width="2"/><path d="M68 98L90 82" stroke="#fff" stroke-width="1.5"/>'+sp(92,80,5,'#fff')+sp(26,110,3,p)+sp(100,112,2.5,p),
+chest:(p,q)=>glow(60,98,32,p)+'<path d="M30 108L36 72H84L90 108Z" fill="#7a4020"/><rect x="28" y="106" width="64" height="34" rx="3" fill="#8a4a24"/><rect x="28" y="106" width="64" height="8" fill="'+p+'"/><path d="M28 124H92" stroke="#4a2410" stroke-width="3"/><rect x="55" y="120" width="10" height="12" rx="2" fill="'+q+'"/>'+[[40,102],[52,98],[64,100],[76,98],[84,102],[58,92]].map(c=>'<circle cx="'+c[0]+'" cy="'+c[1]+'" r="5" fill="'+q+'" stroke="#a07a10" stroke-width="1"/>').join('')+sp(30,80,3,'#fff')+sp(92,84,3,'#fff'),
+ring:(p,q)=>'<ellipse cx="60" cy="106" rx="26" ry="22" fill="none" stroke="'+p+'" stroke-width="6"/><polygon points="60,58 74,72 60,92 46,72" fill="'+q+'" stroke="'+p+'" stroke-width="2"/><path d="M46 72H74M60 58L52 72L60 92L68 72Z" stroke="#fff" stroke-width="1" fill="none"/>'+sp(86,60,5,'#fff')+sp(34,64,3,'#fff'),
+stairs:(p,q)=>'<circle cx="86" cy="42" r="18" fill="'+p+'"/>'+[0,1,2,3,4,5].map(i=>'<rect x="'+(18+i*12)+'" y="'+(134-i*14)+'" width="14" height="'+(20+i*14)+'" fill="'+(i%2?q:p)+'" fill-opacity="0.9"/>').join('')+sp(30,60,3,p)+sp(50,40,2.5,p),
+eyes:(p,q)=>'<rect width="120" height="180" fill="#05030a" fill-opacity="0.55"/>'+[[34,74,3],[84,92,4],[52,118,2.6],[96,60,2.4],[22,108,2.2]].map(e=>'<ellipse cx="'+f(e[0]-e[2]*1.6)+'" cy="'+e[1]+'" rx="'+e[2]+'" ry="'+f(e[2]*0.6)+'" fill="'+p+'"/><ellipse cx="'+f(e[0]+e[2]*1.6)+'" cy="'+e[1]+'" rx="'+e[2]+'" ry="'+f(e[2]*0.6)+'" fill="'+p+'"/><circle cx="'+e[0]+'" cy="'+e[1]+'" r="'+f(e[2]*3)+'" fill="'+p+'" fill-opacity="0.1"/>').join('')+sp(60,40,3,'#fff'),
+river:(p,q)=>'<path d="M0 110Q30 90 60 100T120 80V180H0Z" fill="'+q+'" fill-opacity="0.35"/><path d="M56 56Q88 76 58 98T66 140T80 180" stroke="'+p+'" stroke-width="12" fill="none" stroke-linecap="round"/><path d="M56 56Q88 76 58 98T66 140T80 180" stroke="#fff" stroke-width="1.4" fill="none" stroke-opacity="0.7"/>'+sp(34,70,3,p)+sp(96,60,3,p),
+rainbow:(p,q)=>['#ff7a8a','#ffb860','#ffe27a','#8fe09a','#7ab8ff','#b48cf0'].map((c,i)=>'<path d="M'+(14+i*5)+' 140A'+(46-i*5)+' '+(46-i*5)+' 0 0 1 '+(106-i*5)+' 140" stroke="'+c+'" stroke-width="5" fill="none"/>').join('')+'<ellipse cx="22" cy="142" rx="16" ry="8" fill="#fff" fill-opacity="0.9"/><ellipse cx="98" cy="142" rx="16" ry="8" fill="#fff" fill-opacity="0.9"/>'+sp(60,40,4,'#fff')
+};
+const C=[
+{n:"Gece kelebeği",k:"Dönüşüm",m:"Canım, bu kartı kelebek getirdi sana: kabuğun artık dar geliyor. Bir kapanış var ama arkasından hafifleyeceksin. Karanlıktan korkma, kanatların zaten hazır.",ac:"#c9a7ff"},
+{n:"Ay feneri",k:"Rehberlik",m:"Fenerin ışığı yalnızca bir adım ötesini gösteriyor ve sana o yeter. Yolu aklınla değil, iç sesinle bulacaksın. Sabırlı ol, ay seni yarı yolda bırakmaz.",ac:"#ffd77a"},
+{n:"Kök köprüsü",k:"Bağlantı",m:"Bak, iki yaka arasında eski köklerden bir köprü uzanıyor. Biriyle ya da geçmişinle bağın kuvvetleniyor. Acele etme, sağlam geçit yavaş kurulur.",ac:"#9be3a8"},
+{n:"Işık böceği",k:"Umut",m:"Karanlık kalın ama küçük bir ışık hâlâ yanıyor. Yakında gelecek bir haber kalbini ısıtacak. Umudu avucunda sakla, sakın söndürme.",ac:"#e6f06a"},
+{n:"Sis kapısı",k:"Eşik",m:"Sisin ardında bir kapı görüyorum, aralık duruyor. Ötesini göremiyorsun ama seni çağırıyor. Bir adım at canım, gerisi yol üstünde belli olur.",ac:"#b9c4ff"},
+{n:"Gümüş pınar",k:"Şifa",m:"Şifa suyu akıyor sana doğru. Yorgunluğun ve kırgınlığın yavaş yavaş yıkanıyor. Bu hafta kendine yumuşak davran.",ac:"#8fe3ef"},
+{n:"Baykuş bekçi",k:"Sezgi",m:"Gece bekçisi seni izliyor, gözlerinde sessiz bir bilgelik var. İçine doğan şey yanıltmaz. Karar vermeden önce biraz sus ve dinle.",ac:"#f0b57a"},
+{n:"Yıldız tohumu",k:"Potansiyel",m:"Gökten düşen bir yıldız toprağa karışmış, filiz vermek üzere. Aklındaki dilek sandığından büyük. Sulamayı ihmal etme, zamanla görürsün.",ac:"#f5a8ff"},
+{n:"Dikenli çit",k:"Sınırlar",m:"Etrafında dikenli bir çit görüyorum, seni koruyor. Herkesi içeri almak zorunda değilsin. Kapıyı kime açacağına sen karar verirsin.",ac:"#ff9aa8"},
+{n:"Yağmur dansı",k:"Arınma",m:"Gökyüzü ağlıyor ama bu iyi bir ağlayış. İçinde birikenler akıp gidecek. Yağmurdan sonra hava hep daha temiz olur, bunu bilirsin.",ac:"#9fd0ff"},
+{n:"Kristal mağara",k:"İç gerçek",m:"Derine iniyorsun ve karanlığın içinde parlayan bir şey var: kendi gerçeğin. Yüzleşmek ürkütür ama bedeli ışıktır.",ac:"#d2b8ff"},
+{n:"Şafak çiçeği",k:"Yeni başlangıç",m:"Uzun gecenin ardından şafak çiçeği açtı. Bereket ve sevinç kapına yaklaşıyor. Kendine izin ver, bu güzelliği hak ediyorsun.",ac:"#ffc08a"}
+];
+const D=[
+["Güneş tacı","Başarı","Güneş sana taç giydirmiş, parlama sırası sende. Emeklerinin karşılığını göreceksin. Alçakgönüllü kal ama saklanma.","#ffd77a","#5a2a50","#ff9a5a","#6a2a38","h","sun","#ffe08a","#ff9a5a","#ffe08a"],
+["Yıldız kuyusu","Dilek","Kuyuya bir dilek attın, yıldızlar yankılıyor. Cevap geç gelebilir ama gelecek. Dileğini kimseye söyleme canım.","#b9c4ff","#0e1236","#2a3a78","#10143a","p","well","#a8c0ff","#ffffff","#a8c0ff"],
+["Sessiz göl","Dinginlik","Suyun yüzü ayna gibi durgun. Telaşın boşuna, fırtına dindi. Kendi yansımana dürüstçe bak, huzur orada bekliyor.","#8fe3ef","#0e2a3a","#2a5a6a","#0a1e26","p","lake","#eaf8ff","#3a8aa0","#cfeef8"],
+["Büyülü kitap","Bilgi","Eski bir kitap sayfalarını kendiliğinden çeviriyor. Öğreneceğin önemli bir şey var, belki bir sır. Okumadan, sormadan karar verme.","#f0b57a","#2a1a30","#5a3a50","#1a0e1c","m","book","#f4e2b8","#e0c890","#ffd77a"],
+["Gümüş anahtar","Çözüm","Elindeki anahtar uzun zamandır kilitli duran kapıya uyuyor. Çözüm sandığından basit. Cesaret et ve çevir.","#cfd8e8","#1a2030","#3a4a68","#10161e","p","key","#dfe6f4","#8a9ab8","#b0c0e0"],
+["Kırık ayna","Yanılsama","Aynada gördüğün tam gerçek değil, çatlaklar var. Biri ya da bir şey olduğundan farklı görünüyor. Parçaları toplamadan hüküm verme.","#ff9aa8","#2a1030","#5a2a58","#14081a","m","mirror","#e8b0d8","#4a3a6a","#ff9ad8"],
+["Tilki ruhu","Kurnazlık","Tilki gölgede sana göz kırpıyor. Zekân bu işi çözecek ama etrafında oyun oynayanlar da var. Gözünü açık tut, dilini tut.","#ffa860","#2a1a20","#6a3a30","#1a0e10","p","fox","#e8742c","#ffffff","#ffa860"],
+["Kurt uluması","Özgürlük","Ay doğdu, içindeki vahşi taraf uyanıyor. Sürüne dönme ya da yalnız yürüme çağrısı bu. Sesini kısma canım.","#c8d0ff","#0c1030","#2a3060","#0a0c20","p","wolf","#12101e","#ffffff","#e8f0ff"],
+["Geyik bekçi","Onur","Ormanın asil bekçisi önünden geçti. Sabırlı ve onurlu duruşunun karşılığını alacaksın. Başını dik tut.","#9be3a8","#10281c","#2a5a3a","#0a1a10","p","stag","#8a5a34","#e0c08a","#bff0c0"],
+["Karga habercisi","Haber","Karga pencereye kondu, haber taşıyor. Beklenmedik bir mesaj ya da gerçek ortaya çıkacak. Korkma, haber kötü olmak zorunda değil.","#d2b8ff","#1a1230","#4a3a6a","#0e0a1c","p","raven","#0c0a14","#c8b8f0","#d2b8ff"],
+["Ay tavşanı","Şans","Ay tavşanı sıçradı, şans kapında. Kısa süreli bir fırsat bu, çabuk davran. Cesur zıplayana yer açılır.","#fff0c0","#1a1a40","#4a4a88","#0e0e28","h","hare","#f2ecdc","#ffd0d8","#fff6d0"],
+["Yılan halkası","Döngü","Yılan kendi kuyruğunu yutmuş: bir döngü kapanıyor. Hep aynı şeyleri yaşıyorsan sebebini sor. Her bitiş yeni bir başlangıçtır.","#9be3a8","#0c2a20","#2a6a50","#082018","m","ouro","#5ad08a","#e8ffb0","#7ae8a8"],
+["Kaplumbağa","Sabır","Ağır ağır ama emin adımlarla ilerliyorsun. Hız bu işte işe yaramaz. Sabrının sonunda tatlı bir yere varacaksın.","#8fe3b8","#0a2a3a","#2a7a78","#08202a","h","turtle","#5a8a4a","#a8c878","#9fe8d0"],
+["Gümüş balık","Akış","Gümüş balık akıntıyla birlikte süzülüyor. Direnmeyi bırak, akışa güven. Rızık ve fırsat nehirle birlikte geliyor.","#a8d8ff","#08203a","#1a5a8a","#061830","n","fish","#c8e0f4","#6a9ac8","#8fd0ff"],
+["Arı peteği","Emek","Arılar durmadan çalışıyor, petekler dolmak üzere. Emeğin tatlı bir meyve verecek. Topluluk içinde güç var, yardım istemekten çekinme.","#ffd060","#3a2a0c","#8a5a1a","#2a1a06","n","hex","#ffc840","#e8a020","#ffd77a"],
+["Beyaz kuğu","Zarafet","Suyun üstünde zarafetle süzülen bir kuğu görüyorum. Altında çalkalansan da dışarıdan sakin görünüyorsun. Güzel bir ilişki ya da yetenek ortaya çıkıyor.","#f0e8ff","#2a2048","#6a5a98","#1a1430","p","swan","#f6f2ff","#9a8ac8","#e8dcff"],
+["Barış güvercini","Barış","Güvercin zeytin dalıyla geldi. Bir küslük ya da gerginlik sona erecek. İlk adımı atan sen ol canım.","#fff0c0","#3a6a9a","#c8e4f4","#4a7a5a","h","dove","#ffffff","#b8c8dc","#ffffff"],
+["Eski çan","Uyarı","Çan çalıyor, dikkat et! Önemli bir şeye uyanma zamanı. Kulak ver, ertelediğin bir konu seni bekliyor.","#ffd77a","#1a1a30","#3a3a5a","#10101e","m","bell","#d8a840","#8a6a20","#ffd77a"],
+["Taştaki kılıç","Kader","Kılıç taşta bekliyor ve onu çekecek kişi sensin. Büyük bir sorumluluk ve cesaret çağrısı bu. Kendine inan, zamanı geldi.","#cfd8e8","#1a2438","#4a5a7a","#0e1420","p","sword","#e8f0ff","#d8a840","#cfe0ff"],
+["Orman tacı","Otorite","Taç başına konuyor: liderlik ya da söz sahibi olma zamanı. Gücü şefkatle kullan. Taç ağırdır, taşımayı bil.","#ffd77a","#10281c","#3a6a40","#0a1c12","p","crown","#f0c850","#b88a20","#ffe08a"],
+["Kalp ağacı","Aşk","Ağacın dallarında bir kalp açmış. Sana yaklaşan bir sevgi var, yeni ya da yenilenmiş. Güvenle ve nazikçe karşıla.","#ffb0c8","#2a1030","#7a3a68","#1a0a1e","h","hearttree","#ff7a9a","#3a7a4a","#ffc0d8"],
+["Kader çarkı","Değişim","Çark dönüyor: yukarıdaki aşağı iner, aşağıdaki yukarı çıkar. Şu an ne yaşıyorsan geçicidir. Dönüşe uyum sağla canım.","#e0c8ff","#14103a","#3a2a78","#0c0a24","n","wheel","#d8b86a","#e0c8ff","#b898ff"],
+["Rüzgar fısıltısı","Hareket","Rüzgar yaprakları savuruyor, hava değişiyor. Yakında bir yolculuk ya da taşınma olabilir. Eski yükleri geride bırak.","#b8f0e8","#1a3a48","#5a9aa8","#10303a","h","wind","#e8fffa","#8fe0a0","#d8fff4"],
+["Yıldırım","Sarsıntı","Gökten bir yıldırım düştü, ani bir sarsıntı bu. Eskiyen bir yapı yıkılacak, yerine sağlamı gelecek. Korkma, hava temizlenecek.","#ffe66a","#14102a","#3a2a5a","#0a0818","p","bolt","#fff07a","#ffa830","#ffe66a"],
+["Mantar halkası","Büyü","Mantarlar halka yapmış, perilerin dans yeri burası. Gizli bir şans ve şaşırtıcı bir tesadüf görüyorum. Gözüne değil, hissine güven.","#ff9ab0","#1a2a20","#3a5a44","#0e1a12","m","shrooms","#d84a60","#e8a040","#ffb0c0"],
+["Kum saati","Zaman","Kum akıyor, zaman çok kıymetli. Ertelediğin bir konu için son çağrı bu. Ama telaş etme, doğru zamanı kalbin bilir.","#f0c890","#2a1a10","#6a4a2a","#1a0e08","n","hourglass","#f0d090","#8a5a2a","#ffd890"],
+["Fenerli yolcu","Yolculuk","Fenerli bir yolcu patikada yürüyor. Yalnız gibi görünse de yolun sonu var. Hafif çık, gerisini yolda öğrenirsin.","#ffd77a","#0e1a30","#2a3a5a","#080e1a","p","traveler","#2a2a4a","#ffd77a","#8aa0e0"],
+["Dans eden peri","Neşe","Perinin kanatları titriyor, neşe geliyor. Hafiflik, oyun ve küçük mucizeler seni arıyor. Kendini fazla ciddiye alma canım.","#f5a8ff","#2a1040","#6a3a88","#1a0a28","m","fairy","#ff9ad8","#c8f0ff","#f5c8ff"],
+["Cüce hazinesi","Bolluk","Sandık aralanmış, altınlar parlıyor. Maddi ya da manevi bir kazanç görüyorum. Paylaşırsan çoğalır, unutma.","#ffd060","#1a1a10","#4a3a1a","#0e0c06","n","chest","#ffd060","#ffe27a","#ffd060"],
+["Gümüş yüzük","Söz","Yüzük bir işaret: bir söz ya da bağlılık var hayatında. Sözünü tutmak ve tutulmasını beklemek çağrısı bu. Kalpten verilen söz kutsaldır.","#cfe0ff","#1a1a40","#4a4a88","#0e0e28","n","ring","#e0e8f8","#9ad8ff","#b0c8ff"],
+["Işık merdiveni","Yükseliş","Merdiven aya uzanıyor, basamak basamak çıkacaksın. Yükselmek emek ister. Aşağı bakma, bir sonraki basamağa bak.","#f0e8b0","#14143a","#4a3a78","#0c0c28","n","stairs","#f4efc0","#8a78c8","#fff6c8"],
+["Karanlık gözler","Korku","Karanlıktan gözler seni izliyor ama ormanın gölgesi seni yemez. Korktuğun şeyin çoğu hayalinde büyüyor. Işığını yak ve yürü.","#ffcc66","#0a0a14","#1a1a30","#05050c","p","eyes","#ffcc40","#2a2a3a","#3a3a60"],
+["Altın nehir","Bereket","Vadiden altın bir nehir akıyor, bereket yolda. Emeğin ve sabrının ödülü geliyor. Kürek çekmeyi bırakma.","#ffd77a","#1a2a30","#4a6a5a","#0e1a18","h","river","#ffd060","#7ab870","#ffe08a"],
+["Gökkuşağı","Mutluluk","Fırtınadan sonra gökkuşağı çıktı! Dilek, mutluluk ve onarım getiriyor. Zor günlerin ardındaki ödül bu, kabul et.","#ffd0e8","#5a8ac8","#d8ecf8","#3a8a5a","h","rainbow","#ffffff","#ffffff","#ffffff"]
+];
+const RV=[
+["Direnç","Kabuğundan çıkmaya direniyorsun canım. Değişim kapıda ama sen eski alışkanlıklara tutunuyorsun. Korkunun seni uçurmak yerine hapsetmesine izin verme, yoksa fırsat solup gider."],
+["Yolunu kaybetme","Fenerin ışığı titriyor, yolu net göremiyorsun. Başkalarının sesi iç sesini bastırıyor. Biraz dur, sisin çekilmesini bekle, acele kararlar seni daha da dolaştırır."],
+["Kopuş","Köprünün tahtaları gevşemiş, bir bağ zayıflıyor. Söylenmemiş sözler ya da güvensizlik aranıza mesafe koyuyor. Onarmak istiyorsan ilk adım dürüst bir konuşma."],
+["Umutsuzluk","Işık sönükleşiyor ve karanlık gözüne fazla büyük görünüyor. Yorgunluk umudunu gölgeliyor. Unutma, gece en koyu hâlindeyken şafağa en yakındır, ama dinlenmeden yürüme."],
+["Kapalı kapı","Kapı kapanmış gibi görünüyor, sis de yoğunlaşmış. Geçmen gereken yer henüz burası değil. Zorlama, zamanı gelince kendiliğinden aralanır."],
+["Tükenmişlik","Pınar kurumaya yüz tutmuş, kendinden fazla veriyorsun. Yaraları görmezden gelmek onları iyileştirmez. Başkaları dolsun diye kendini boşaltma, önce dinlen."],
+["Kör nokta","Gözlerin kapalı, sezgini susturuyorsun. Mantıkla hissin çatışıyor ve sen ikisini de dinlemiyorsun. İçinde bir şey ters diyorsa görmezden gelme."],
+["Filizlenememe","Tohum toprağın altında bekliyor ama su bulamıyor. Fikirlerin ertelemeyle çürüyebilir. Küçük bir adımla başla, mükemmel zamanı bekleme."],
+["Duvar","Çit artık korumaktan çok seni hapsediyor. Kendini herkesten saklamak yalnızlık getiriyor. Bazı dikenleri budamanın vakti geldi."],
+["Bastırılmış duygu","Yağmur yağmak istiyor ama bulutlar tutuyor. Biriken duygular sessizce ağırlaşıyor. Konuşmazsan boğazına düğümlenir canım, bırak aksın."],
+["Kaçınma","Mağaranın girişinde duruyorsun ama içeri girmekten kaçıyorsun. Gerçekle yüzleşmeyi ertelemek karanlığı büyütüyor. Ne kadar çok ertelersen o kadar ağırlaşır."],
+["Geç açış","Çiçek açacak ama biraz gecikmeyle. Sevinç yolda, sen ise bekleyişten bıkmışsın. Sabret, kapanmış gibi görünen tomurcuk yine de açar."],
+["Kibir","Güneş gözlerini kamaştırıyor. Başarı başına vurursa etrafındakileri göremezsin. Parlamak güzel, yakmak değil."],
+["Boş dilek","Kuyuya attığın dilek yankı vermiyor. Sadece dilemek yetmez, eyleme geçmen lazım. Hayal kurarken ayaklarını yere bas."],
+["Durgunluk","Su durgun değil, bataklığa dönüyor. Huzur sandığın şey aslında kıpırdamamak olabilir. Bir taş at, suyu karıştır."],
+["Yanlış bilgi","Sayfalar karışmış, bilgi yarım ya da çarpıtılmış. Duyduğun her şeye inanma. Kaynağını sorgula, acele hüküm verme."],
+["Kilit","Anahtar paslanmış ya da yanlış kapıda. Çözümü yanlış yerde arıyorsun. Geri dön, başka bir kapıyı dene."],
+["Gerçeğin ortaya çıkışı","Ayna düzelince sahte perde iniyor: gizli olan açığa çıkacak. Acı verse de gerçek seni özgürleştirir. Yüzleşmeye hazırlan."],
+["Aldatma","Tilkinin oyunu sana dönüyor. Kandırılıyor ya da kendini kandırıyor olabilirsin. Fazla güvenme, ağzı iyi laf edenlere karşı temkinli ol."],
+["Yalnızlık","Sürüden kopmuşsun ve uluman duyulmuyor. Özgürlük yalnızlığa dönüşmüş olabilir. Yardım istemek zayıflık değil."],
+["Gurur","Başını o kadar dik tutuyorsun ki yolu göremiyorsun. İnatla gururu karıştırma. Biraz eğilmek seni kırmaz."],
+["Kötü haber","Karga kötü bir haber getiriyor ya da bir sırrı fısıldıyor. Beklenmedik bir üzüntü olabilir. Hazırlıklı ol ama dedikoduya kulak verme."],
+["Kaçan fırsat","Tavşan sıçradı ama sen yetişemedin. Tereddüt şansı uzaklaştırdı. Bir sonraki fırsatta daha çabuk ol."],
+["Kısır döngü","Aynı hataları tekrar ediyorsun ve çıkış yok gibi. Döngüyü kırmak için bir şeyi değiştirmelisin. Alışkanlıkların seni yutuyor."],
+["Tıkanıklık","Yavaşlık artık erdem değil, tıkanıklık. Fazla temkin seni yerinde saydırıyor. Biraz cesaretle kafanı kabuğundan çıkar."],
+["Akıntıya karşı","Akıntıya karşı kürek çekiyorsun ve yoruluyorsun. Bazı şeyleri zorlamak yerine bırakmak gerek. Yön değiştirmeyi düşün."],
+["Boşa emek","Çok çalışıyorsun ama bal toplanmıyor. Emeğin takdir edilmiyor ya da yanlış yere akıyor. Kendini tüketme."],
+["Gösteriş","Yüzeydeki güzellik altındaki çalkantıyı saklıyor. Başkalarına yaranmak uğruna kendinden uzaklaşıyorsun. Gerçek sen daha güzel."],
+["Gerginlik","Güvercin uçup gitti, barış kırıldı. Bir tartışma ya da küslük sürüyor. Kimin haklı olduğunu değil, ne istediğini düşün."],
+["Duymazdan gelmek","Çan çalıyor ama sen kulaklarını tıkamışsın. Uyarıları görmezden gelmek pahalıya patlar. Ertelediğin şeyin faturası yaklaşıyor."],
+["Korkak adım","Kılıç taşta kalıyor, çekmeye cesaretin yok. Sorumluluktan kaçıyor olabilirsin. Kendine olan güvenin sarsılmış, onu yeniden topla."],
+["Zorbalık","Taç başında ama güç kötüye kullanılıyor. Kontrol etmek isterken insanları kaybedebilirsin. Ya da biri senin üzerinde baskı kuruyor."],
+["Kalp kırıklığı","Ağacın kalbi çatlamış, bir sevgi sınanıyor. Hayal kırıklığı ya da ayrılık olabilir. Kalbini kapatma, iyileşmesi için ona zaman tanı."],
+["Direnen çark","Çark takılıyor, değişimi sen engelliyorsun. Kötü bir dönem uzuyor gibi hissediyorsun. Direndikçe çark daha çok sürtünür."],
+["Savrulmak","Rüzgar seni savuruyor, nereye gittiğini bilmiyorsun. Kararsızlık ve dağınıklık var. Önce bir çapa bul, sonra yelken aç."],
+["Kaçınılan yıkım","Yıldırımdan kaçmaya çalışıyorsun ama sarsıntı geliyor. Yıkımı geciktirmek şiddetini artırır. Çatlak duvarı şimdi onar."],
+["Tuzak","Halka sevimli ama içine girersen çıkmak zor olabilir. Cazip görünen bir şey seni oyalıyor. Gözünü açık tut, her büyü güzel değildir."],
+["Geç kalmak","Kum tükeniyor ve sen hâlâ ertelemedesin. Zaman kaybı seni sıkıştırıyor. Küçük de olsa bugün bir adım at."],
+["Kayboluş","Fener sönüyor, patikayı kaybettin. Yolculukta yön duygun bulanık. Durup haritaya bak ya da yol bilen birine danış."],
+["Sorumsuzluk","Neşe taşkınlığa dönmüş. Oyun oynarken önemli bir şeyi ihmal ediyor olabilirsin. Biraz ciddiyet de gerek."],
+["Kıtlık","Sandık boş ya da kilitli. Para konusunda dikkatli ol, savurganlık ya da kayıp olabilir. Cimrilik de çözüm değil, dengeyi bul."],
+["Bozulan söz","Söz yerine getirilmemiş ya da bağlılık sarsılmış. Bir güven sorunu var. Yüzüğü çıkarmadan önce açıkça konuşun."],
+["Kayma korkusu","Basamaklar kaygan, yükselmek yerine kayıyor gibisin. Acele ederek çıkma, sağlam adım at. Özgüvenini topla."],
+["Korkuyu aşış","Gözler çekiliyor, karanlık dağılıyor. Korktuğun şeyin aslında zararsız olduğunu fark ediyorsun. Yine de ihtiyatı elden bırakma."],
+["Kuruyan nehir","Nehir yatağı daralıyor, bereket azalıyor. Harcamalara ve geleceğe dikkat. Küçük tasarruflar büyük fark yaratır."],
+["Solan renkler","Gökkuşağı sönük, mutluluk gölgelenmiş. Beklediğin sevinç gecikiyor. Yine de bulut geçince renkler geri döner."]
+];
+function mk(d,i){
+  const [n,k,m,ac,a,b,gc,env,mot,p,q,gl]=d,id=i+30;
+  let e='';
+  if(env==='p')e=pines(id,gc,152,40,13);
+  else if(env==='h')e=hill(gc,130,16)+'<g fill-opacity="0.35">'+hill('#000',150,10)+'</g>';
+  else if(env==='m')e=hill(gc,140,12)+mist('#fff',[116,136,156]);
+  else e=hill(gc,164,6);
+  return ()=>sky(id,a,b)+stars(id,16,100,'#fff')+glow(60,88,46,gl)+e+MO[mot](p,q)+grass(id,14,'#050508',182,26);
+}
+D.forEach((d,j)=>{C.push({n:d[0],k:d[1],m:d[2],ac:d[3]});S.push(mk(d,12+j))});
+const LONG=[
+["Kartta ay ışığında kanatlarını yeni açmış iri bir gece kelebeği görüyorum, kanatlarındaki gözler seni izliyor sanki. Bu kelebek bir dönüşümün habercisi canım: hayatında bir bölüm sessizce kapanıyor ve sen farkında olmasan da ikinci bir hâle çoktan geçmişsin. Birkaç hafta içinde eskiden seni üzen bir şeyin artık üzmediğini fark edeceksin. Bırak kabuğun düşsün, karanlıktan korkma, çünkü kelebek geceleyin uçar.","Kelebek baş aşağı durmuş, kanatları yarı kapalı, kozasından çıkmaya çekiniyor gibi. Bu kart bana şunu söylüyor: değişim kapında ama sen eski alışkanlıkların sıcaklığına tutunuyorsun. Korku seni korumak istiyor ama aslında hapsediyor. Bir şeyi bırakamıyorsun, belki bir kişiyi, belki bir düşünceyi ve bu yüzden hayatın yerinde sayıyor. Kozayı sen kırmazsan zaman kırar, o da daha sert olur."],
+["Karanlık bir ormanda, bir dalın ucunda sallanan altın rengi bir fener görüyorum, ışığı ağaçları ürkütmeden usulca aydınlatıyor. Bu fener rehberliğin kartı: yolun tamamını göstermiyor, yalnızca bir adım ötesini ve şimdilik sana o yetiyor. Yakında bir sözle, bir rüyayla ya da küçük bir işaretle doğru yönü anlayacaksın. Aklınla değil iç sesinle yürü, ay seni yarı yolda bırakmaz.","Fener ters dönmüş, alevi titriyor ve çevresindeki gölgeler uzamış. Bu kart kafanın karışık olduğunu söylüyor: herkes bir şey öneriyor, sen ise kendi sesini duyamıyorsun. Yön duygunu kaybettiğin bu dönemde hızlı karar vermek seni daha derine sokar. Birkaç gün sessizliğe çekil, başkalarının fenerini değil kendi fitilini canlandır."],
+["Eski bir ağacın kökleri akan bir derenin üzerinde doğal bir köprü kurmuş, kıyıdaki yosunlar bile yumuşak ve nemli. Bu kart bir bağın kuvvetlendiğini gösteriyor: biriyle ya da kendi geçmişinle aranda sağlam bir geçit açılıyor. Küs olduğun, uzak kaldığın biri adım atabilir ya da sen atacaksın. Acele etme canım, sağlam köprüler yavaş örülür ve bu köprü uzun yıllar dayanacak.","Köprünün tahtaları gevşemiş, bir kök kopmuş ve altındaki su hırçınlaşmış. Bu kart yakın bir bağın zayıfladığını söylüyor: söylenmemiş sözler, kırgınlıklar ve sessizlik aranızda mesafe açıyor. Kimin suçlu olduğunu aramak yerine nerenin çatladığına bak. Dürüst bir konuşma bu köprüyü onarabilir ama bunu bir an önce yapmalısın, çünkü sular yükseliyor."],
+["Karanlık bir çayırın üstünde yüzlerce ışık böceği süzülüyor, ortadaki en iri olanı sanki sana göz kırpıyor. Bu kart umudun kartı: durumun ne kadar karanlık görünürse görünsün küçük bir ışık hâlâ yanıyor ve yakında gelecek bir haber ya da tesadüf kalbini ısıtacak. İyi bir şey olacağına inanmakta zorlanıyorsan bile bu kart tam da o yüzden çıktı. Umudu avucunda sakla, sakın söndürme.","Böceklerin ışığı sönükleşmiş, çayır neredeyse tamamen karanlık. Yorgunluk umudunu gölgelemiş, her şeyin boşuna olduğunu düşünür hâle gelmişsin. Bunu hissetmen çok doğal canım ama bu his gerçeğin kendisi değil, yorgunluğun sesi. Gece en koyu hâlindeyken şafağa en yakındır, yalnızca bir süre dinlen ve kendine acımasız davranma."],
+["Yosun tutmuş bir ağacın gövdesinde aralık duran kemerli bir kapı var, içinden loş ve sıcak bir ışık sızıyor ve önünde ince bir sis dolaşıyor. Bu kart yeni bir eşiğin kartı: önünde bir fırsat ya da karar duruyor, ötesini göremiyorsun ama seni çağırıyor. Belirsizlik korkutucu, biliyorum, ama o kapının ardında seni bekleyen şey sandığından yumuşak. Bir adım at, gerisi yol üstünde belli olur.","Kapı sımsıkı kapanmış, sis o kadar yoğunlaşmış ki kolunu bile göremiyorsun. Bu kart şu an geçmen gereken yerin burası olmadığını söylüyor. Bir kapıyı zorlayıp durmak seni yorar ve belki de yanlış odaya sokar. Başka bir yöne bak, kapalı gibi görünen kapı zamanı gelince kendiliğinden aralanır."],
+["Yosunlu kayaların arasından gümüş renginde bir su akıyor, üstünde ay ışığı titreşiyor ve kıyısında yabani çiçekler açmış. Bu kart şifanın kartı: yorgunluğunun, kırgınlığının ve eski bir yaranın yavaş yavaş yıkandığını görüyorum. Önümüzdeki günlerde bedenin ve ruhun hafifleyecek, uykun düzelecek. Kendine nazik davran, pınar acele etmez ama hiç kurumaz.","Pınarın suyu azalmış, taşlar görünmeye başlamış ve kıyıdaki çiçekler solgun. Bu kart tükenmişliği gösteriyor: başkaları için fazla vermişsin, kendine pay ayırmamışsın. Yaralarını görmezden gelmek onları iyileştirmiyor, yalnızca ertelemeye yarıyor. Birine hayır deme, bir günü tamamen kendine ayırma vakti geldi."],
+["Dolunayın önünde kalın bir dala tüneyen koca bir baykuş var, sarı gözleri bir an bile kırpılmıyor. Bu kart sezginin kartı: içine doğan şey yanıltmıyor ve sana söylenmemiş bir gerçeği sen zaten sezmişsin. Karar vermeden önce bir gece uyu ve sabah içinden ilk gelen cevaba bak. Baykuş sessizlik içinde bilir, sen de öyle yap.","Baykuşun gözleri yarı kapalı, dalın üstünde başını kanadının altına gömmüş. Bu kart bir kör noktanı gösteriyor: sezgini susturuyorsun ve mantığınla hissin birbirine karşı dövüşüyor. İçinde bir şey ters diyor ama sen duymazdan geliyorsun. Bunu görmezden gelmek bir süre rahat ettirir ama sonunda daha büyük bir bedel çıkarır."],
+["Gökten kuyruklu bir yıldız düşüyor ve bir tepeciğe konan o ışıktan minik yeşil bir filiz çıkmış, çevresi pırıl pırıl. Bu kart henüz küçük ama çok büyük bir potansiyelin kartı: aklında bir dilek, bir fikir ya da bir sevgi var ve sandığından çok daha büyük olacak. Ona zaman, su ve inanç ver. Önümüzdeki aylarda bu filizin dal verdiğini göreceksin.","Tohum toprağın altında bekliyor ama su bulamıyor, yıldızın ışığı bulutların ardında kalmış. Bu kart bir fikrin ertelemeyle çürüdüğünü söylüyor: mükemmel zamanı bekliyorsun ama o zaman hiç gelmeyecek. Küçük bir adım at, bir mesaj yaz, bir not al, bir telefon aç. Tohum sulanmayı bekliyor."],
+["Gül dikenleriyle örülmüş yüksek bir çit görüyorum, ortasında ay ışığına açılan kemerli bir geçit ve içeride kızıl güller var. Bu kart sınır çizme kartı: seni korumak için bir çit örmüşsün ve bu yanlış değil. Herkesi içeri almak zorunda değilsin, bazı insanlar yalnızca dikenleri görür, güllere layık olmazlar. Kapıyı kime açacağına yalnızca sen karar verirsin.","Dikenler çok uzamış, çit geçidi neredeyse tamamen kapatmış ve içerideki güller kurumaya başlamış. Bu kart duvarlarının seni korumaktan çok hapsettiğini söylüyor. Kendini herkesten saklamak yalnızlık getiriyor ve kırılmaktan korkarken sevilmekten de uzaklaşıyorsun. Bazı dikenleri budamanın vakti geldi."],
+["Gri bir bulutun altında minik bir mantarın şemsiyesine sığınmış ormanın gecesi, damlalar yapraklara düşüp ritim tutuyor. Bu kart arınmanın kartı: içinde biriken ağırlıklar yağmurla birlikte akıp gidiyor. Ağlamak ya da rahatlamak gerekiyorsa izin ver, bu bir zayıflık değil temizlik. Yağmurdan sonra hava hep daha berrak olur.","Bulutlar çok kara ama bir damla bile düşmüyor, hava ağırlaşmış ve boğucu. Bu kart bastırılmış duygularını gösteriyor: konuşman gereken şeyi yutuyorsun ve boğazına düğümleniyor. Biriktirdikçe ağırlaşır canım. Güvendiğin birine anlat ya da yaz, yeter ki dışarı çıkart."],
+["Karanlık bir mağaranın dibinde mor ve mavi kristallerin parıldadığı bir oda görüyorum, her kristal içinden ışık saçıyor. Bu kart iç gerçeğinle yüzleşme kartı: derine iniyorsun ve orada seni korkutan değil, parlayan bir şey bekliyor. Kendinle dürüst olduğun bu dönem sana yeni bir güç verecek. Sakladığın bir şeyi artık görmenin zamanı geldi.","Mağaranın ağzında duruyorsun ama içeri girmiyorsun, kristallerin ışığı uzaktan sönük görünüyor. Bu kart kaçınmayı gösteriyor: bir gerçekle yüzleşmeyi erteliyorsun. Ne kadar ertelersen karanlık o kadar büyür, oysa o korku gerçeğin kendisinden daha büyük. Bir mum al ve içeri gir."],
+["Ufukta güneş yükseliyor ve tam önünde turuncu yapraklı büyük bir çiçek açmış, çiğ taneleri parlıyor. Bu kart yeni bir başlangıcın kartı: uzun bir gecenin ardından şafak geldi, bereket ve sevinç kapına yaklaşıyor. Önümüzdeki günlerde küçük güzel haberler peş peşe gelebilir. Kendine izin ver, bu güzelliği hak ediyorsun.","Çiçek açmaya hazır ama bulutlar güneşi tutuyor, tomurcuk biraz solgun. Bu kart sevincin gecikmeli geldiğini söylüyor: yolda ama sen beklemekten bıkmışsın. Sabır şu an senin sınavın. Kapanmış gibi görünen tomurcuk yine de açar, yalnızca beklemekten vazgeçme."],
+["Kızıl ve altın bir gökyüzünde devasa bir güneş yükseliyor, ışınları başının üzerinde bir taç gibi açılmış. Bu kart başarının ve görünür olmanın kartı canım: emeklerinin karşılığını göreceğin, birinin ya da bir yerin seni fark edeceği bir dönem yaklaşıyor. Belki bir terfi, belki bir övgü, belki de uzun zamandır beklediğin bir cevap. Alçakgönüllü kal ama saklanma, bu parıltı senin hakkın.","Güneş tepede ama ışığı fazla keskin, ışınları serinletmiyor yakıyor. Bu kart başarıyla gelen kibre karşı uyarıyor: başın göğe değerken etrafındakileri göremeyebilirsin. Biri sana sessizce destek olmuş ama sen fark etmemiş olabilirsin. Biraz geri çekil, teşekkür et ve ışığını paylaş. Parlamak güzel, yakmak değil."],
+["Yosun tutmuş taş bir kuyunun derinliğinde gökyüzünün bütün yıldızları yansıyor, sanki su değil gece doluymuş içi. Bu kart dilek kartı: geçenlerde birine ya da kendi kendine yüksek sesle söyleyemediğin bir şeyi dilemişsin ve yıldızlar bunu duymuş. Cevap hemen gelmeyebilir, bazen bir mevsim bekletir ama gelecek. Dileğini kimseye anlatma, söylenince enerjisi dağılır.","Kuyunun dibine bakıyorum ve yıldızlar yok, yalnızca soğuk ve kuru bir karanlık yankılanıyor. Bu kart boşa giden bir dileği gösteriyor: yalnızca dilemekle yetinmişsin, bir adım atmamışsın. Hayal kurmak güzel ama yıldızlar yalnızca elini uzatana yardım eder. Bir plan yap, küçük bile olsa bugün bir şey başlat."],
+["Ay tam ortasında, ayna gibi pürüzsüz bir gölün üstünde duruyor, kıyıdaki sazlar hiç kıpırdamadan geceyi dinliyor. Bu kart dinginliğin kartı: uzun süredir içinde çalkalanan fırtına dinmek üzere. Önümüzdeki günlerde kafandaki gürültü azalacak, uykun derinleşecek. Bu sessizlikte kendi yansımana dürüstçe bak, aradığın huzur orada seni bekliyor.","Gölün yüzü sakin görünüyor ama kıyılarına yeşil bir tortu birikmiş, hafif bir bataklık kokusu geliyor. Bu kart durgunluğun her zaman huzur olmadığını söylüyor, bazen kıpırdamamak çürümektir. Hayatında uzun zamandır değişmeyen bir şey seni yavaş yavaş yoruyor. Bir taş at, suyu karıştır ve canlı bir şey yap."],
+["Eski deri ciltli bir kitap bir masanın üstünde kendiliğinden açılmış, sayfalarından altın tozlar yükselip mum ışığında dans ediyor. Bu kart bilginin ve bir sırrın kartı: öğrenmen gereken önemli bir şey var, belki bir cevap belki de geçmişten bir hikâye. Okuyacağın ya da duyacağın bir şey bir kararını değiştirecek. Acele etme, sayfayı sonuna kadar çevir.","Kitabın sayfaları birbirine karışmış, bazı satırların mürekkebi akmış ve okunmaz hâle gelmiş. Bu kart yarım ya da çarpıtılmış bir bilgiye karşı uyarıyor: duyduğun her şeye inanma. Biri sana hikâyenin yalnızca işine gelen kısmını anlatıyor olabilir. Kaynağını sorgula, hüküm vermeden önce diğer yarısını da dinle."],
+["Koyu kadife bir zeminin üstünde süslü, ay ışığı gibi parlayan gümüş bir anahtar duruyor, yanında küçük bir kilit hafifçe aralık. Bu kart çözümün kartı: uzun zamandır takıldığın bir konunun kilidi açılmak üzere ve çözüm sandığından çok daha basit. Cevap zaten elinde, yalnızca onu kullanmaya cesaret etmen gerekiyor. Anahtarı çevir, kapı seni bekliyor.","Anahtar paslanmış ve dişleri aşınmış, yanındaki kilit ise başka bir kapıya ait gibi duruyor. Bu kart çözümü yanlış yerde aradığını söylüyor: aynı kapıya takılıp zorluyorsun ama o kapı sana göre değil. Geri çekil, başka bir yol ya da başka bir kapı dene. Bazen çözüm vazgeçmekte yatar."],
+["Gümüş çerçeveli oval bir ayna tam ortasından çatlamış, içindeki yansıman parçalara bölünmüş ve her parça başka bir yüz gösteriyor. Bu kart yanılsamanın kartı: gördüğün şey tam gerçek değil, biri ya da bir şey göründüğünden farklı. Parçaları bir araya getirmeden hüküm verme. Çatlaklar bazen gerçeği saklamaz, tam tersine ortaya çıkarır.","Ayna ters dönünce çatlaklar kapanmaya başlıyor ve arkasındaki perde yavaşça iniyor. Bu kart gizli olanın açığa çıkacağını söylüyor: bir yalan, bir gerçek ya da bir niyet netleşecek. Acı verse de bu seni özgürleştirecek. Yüzleşmeye hazırlan ve bildiğinden vazgeçmekten korkma."],
+["Ay ışığında kıvrılmış kızıl bir tilki oturuyor, kuyruğunun ucu kar gibi beyaz ve gözleri aklından geçeni okuyor gibi. Bu kart kurnazlığın ve zekanın kartı: bu işi aklınla çözeceksin ama etrafında oyun oynayan, sana tüm hikâyeyi anlatmayan biri var. Gözünü açık tut, dilini tut, her bilgiyi paylaşma. Tilki sessizce kazanır.","Tilki sırıtıyor ama bu sefer gülen o, sen değilsin. Bu kart aldatılma ihtimaline karşı uyarıyor: biri ya da kendi kendin seni kandırıyor olabilirsin. Ağzı iyi laf eden birinin sözlerini işine geldiği için kabul etme. Verdiğin ve aldığın sözlerin hepsini yeniden gözden geçir."],
+["Yüksek bir kayanın tepesinde kara bir kurt doğan aya doğru ulumuş, sesi vadinin içinde yankılanıyor ve ağaçlar sessizleşmiş. Bu kart özgürlüğün kartı: içindeki yabani, bağımsız taraf uyanıyor. Sana yük olan bir bağı koparma ya da kendi yolunu çizme cesareti geliyor. Sesini kısma, ulumak senin hakkın.","Kurt ulumuş ama yanıtı gelmiyor, sürüsü çok uzakta ve gece daha soğuk. Bu kart yalnızlığı gösteriyor: özgürlük arayışın seni yalnızlığa itmiş olabilir. Birinin yanında olmaya ihtiyacın var ve bunu kabul etmek zayıflık değil. Yardım iste, sürü seni bekliyor."],
+["Sabah sisinin içinde görkemli, dallı boynuzlarıyla bir geyik duruyor, bakışı sakin ve derin, nefesi buhar gibi yükseliyor. Bu kart onurun kartı: sabırla ve asaletle yürüdüğün yolun karşılığını alacaksın. Seni küçümseyenler yakında seni başka türlü görecek. Başını dik tut ama gözünü yoldan ayırma.","Geyik başını öyle yüksek tutuyor ki önündeki çukuru görmüyor, boynuzları da ağır gelmeye başlamış. Bu kart gururun seni körleştirdiğini söylüyor: inatla onuru karıştırma. Biri sana elini uzatıyor ama sen onu görmüyorsun. Biraz eğilmek seni kırmaz, hatta yükseltir."],
+["Çıplak bir dalın üstünde kara parlak bir karga oturuyor, gözleri akıllı, gagasında katlanmış küçük bir mektup gibi bir şey var. Bu kart haberin kartı: beklenmedik bir mesaj, bir telefon ya da ortaya çıkacak bir gerçek var. Korkma, haber kötü olmak zorunda değil, yalnızca beklediğin gibi gelmeyebilir. Hazırlıklı ol ve sakin karşıla.","Karga ters dönmüş, kanatları bir gölge gibi uzamış ve gagasında bir sır tutuyor. Bu kart rahatsız edici bir haber ya da bir dedikodu geleceğini gösteriyor. Duyduğun şeyin tamamı doğru olmayabilir ama bir kısmı seni etkileyecek. Hazırlıklı ol, doğrusunu kendin araştır."],
+["Dolunayın altında kar beyazı bir tavşan sıçrıyor, arkasında ay tozu bırakıyor ve çimler kıpır kıpır oluyor. Bu kart şansın kartı: kısa ömürlü bir fırsat kapının önünde duruyor. Çabuk davranman ve ilk içgüdünü izlemen gerekiyor. Cesur zıplayana yer açılır.","Tavşan sıçramış ama sen yetişememişsin, ay tozu havada dağılıyor. Bu kart kaçan bir fırsatı gösteriyor: tereddüt şansı uzaklaştırmış. Üzülme, bu fırsat gittiyse bir yenisi var ama bu kez daha çabuk ol. Pişmanlık seni yavaşlatmasın."],
+["Zümrüt yeşili pullu bir yılan kendi kuyruğunu yutmuş, oluşturduğu halkanın içinde gökyüzü parlıyor. Bu kart döngünün kartı: bir şey kapanıyor ve yenisi başlıyor. Hep aynı şeyleri yaşıyorsan sebebini sorgulamanın zamanı geldi. Her bitiş yeni bir başlangıçtır, yeter ki halkayı fark et.","Yılanın dişleri kendi kuyruğuna batmış ve halka sıkıştıkça daralıyor. Bu kart kısır bir döngüyü gösteriyor: aynı hataları, aynı insanlarla tekrar ediyorsun. Çıkış yok gibi hissediyorsun ama döngüyü kırmak için tek bir şeyi değiştirmen yeter. Alışkanlıkların seni yutuyor, onları bırak."],
+["Mavi bir su kenarında yosunlu kabuklu yaşlı bir kaplumbağa ağır adımlarla yürüyor, hiç acelesi yok ve gideceği yeri biliyor. Bu kart sabrın kartı: ağır ağır ama emin adımlarla ilerliyorsun. Bu işte hız işe yaramaz, kararlılık işe yarar. Sabrının sonunda tatlı bir yere varacaksın.","Kaplumbağa kabuğunun içine çekilmiş, hiç kıpırdamıyor ve etrafındaki dünya akıp gidiyor. Bu kart yavaşlığın artık erdem olmadığını söylüyor: tıkanıklık var. Fazla temkin seni yerinde saydırıyor. Biraz cesaretle kafanı kabuğundan çıkar."],
+["Derin mavi bir suyun içinde gümüş pullu bir balık akıntıyla birlikte süzülüyor, her kıvrılışında ışık pullarından saçılıyor ve çevresinde baloncuklar yükseliyor. Bu kart akışın kartı: dirençle yaşadığın bir şeyi bırakırsan yolun kendiliğinden açılacağını söylüyor. Rızık, fırsat ya da bir cevap nehirle birlikte sana doğru geliyor. Kürek çekmeyi bırak, bir süre sadece süzül.","Balık akıntıya karşı yüzüyor, pulları yorgunluktan matlaşmış ve yüzgeçleri titriyor. Bu kart zorlamaya karşı uyarıyor: bazı şeyleri güçle çevirmeye çalışmak yerine bırakmak gerekiyor. Yoruluyorsun ama istediğin yere varamıyorsun, bu yüzden yön değiştirmeyi düşün. Akıntı seni yormak için değil taşımak için var, ona karşı değil onunla git."],
+["Bal rengi altıgen peteklerin arasında çalışkan bir arı dolaşıyor, her göz altın damlalarıyla dolu ve havada sıcak bir bal kokusu var. Bu kart emeğin kartı: yıllardır sessizce verdiğin çabanın karşılığı tatlı bir meyve olarak geri dönecek. Bu yolda yalnız olmadığını da söylüyor, birlikte çalıştığın insanlarla gücün katlanıyor. Yardım istemekten çekinme, bal sabırla ve ortaklıkla dolar.","Petekler boş kalmış, arı yorgun ve çiçekler solmuş, kovan sessiz. Bu kart boşa giden bir emeği gösteriyor: çok çalışıyorsun ama bal toplanmıyor, çabanın görülmediğini ya da yanlış yere aktığını hissediyorsun. Bu duygu seni tüketiyor. Kendini daha fazla yıpratma, önce emeğinin gerçekten karşılık bulacağı yeri bul."],
+["Mor bir gölün üstünde ışıl ışıl beyaz bir kuğu zarafetle süzülüyor, boynu bir soru işareti gibi kıvrılmış ve arkasında ince bir dalga bırakıyor. Bu kart zarafetin ve olgunluğun kartı: dışarıdan sakin görünüyorsun, belki suyun altında çabalıyorsun ama bu sana asalet katıyor. Güzel bir ilişki ya da yeteneğin ortaya çıkıyor, biri seni hayranlıkla izliyor. Kendinden emin ol.","Kuğunun beyazlığına çamur bulaşmış, boynu eğik ve gölün suyu bulanık. Bu kart gösterişin ardındaki çalkantıyı söylüyor: başkalarına yaranmak için kendinden uzaklaşıyorsun. Dışarıdan mükemmel görünmeye çalışırken içinde bir yorgunluk birikiyor. Maskeyi biraz indir, gerçek sen zaten yeterince güzel."],
+["Açık mavi bir gökyüzünde beyaz bir güvercin kanatlarını sonuna kadar açmış, gagasında taze bir zeytin dalı taşıyor. Bu kart barışın kartı: bir küslük, bir gerginlik ya da kapalı kalmış bir konuşma yumuşayacak. İlk adımı atan sen olursan bu daha da güzel olur, gönül almak güçsüzlük değil olgunluktur. Yakında içine bir hafiflik inecek.","Güvercin kanatlarını toplamış, zeytin dalı yere düşmüş ve gökyüzü kapanmış. Bu kart gerginliğin sürdüğünü gösteriyor: bir tartışma, bir küslük hâlâ içinde yatıyor. Kimin haklı olduğunu değil, gerçekte ne istediğini düşün. Kırgınlık büyümeden bir söz söylemek hepsini hafifletir."],
+["Eski bir bronz çan sisli bir gecenin ortasında çalıyor, sesi ormanın üstünden dalga dalga yayılıyor ve kuşlar kanat çırpıyor. Bu kart bir uyarının kartı: önemli bir şeye uyanma zamanı geldi. Ertelediğin bir konu, bir karar ya da bir ihtiyaç seni bekliyor. Bu çan seni korkutmak için değil, vaktinde uyarmak için çalıyor, kulak ver.","Çan çalıyor ama sen kulaklarını tıkamışsın, sesi çatlamış ve sert çıkıyor. Bu kart uyarıları duymazdan gelmenin bedelini gösteriyor. Ertelediğin şeyin faturası yaklaşıyor ve bu sefer sessizce geçmeyecek. Şimdi harekete geç, küçük bir adım bile büyük bir fark yaratır."],
+["Yosunlu bir kayanın içine saplanmış parlak bir kılıç duruyor, etrafında ışıklı tozlar dönüyor ve orman nefesini tutmuş. Bu kart kaderin ve cesaretin kartı: önünde bir sorumluluk var ve onu çekecek kişi sensin. Başkaları yapamadı belki ama senin için bekliyordu. Kendine inan, zamanı geldi.","Kılıç taşta kalıyor, elini uzatmaya cesaretin yok ve gölgesi sana uzanıyor. Bu kart sorumluluktan kaçtığını gösteriyor: özgüvenin sarsılmış, bu yüzden bir fırsatı geri çeviriyorsun. Kendini hafife alma, sandığından güçlüsün. Küçük bir cesaret tüm taşı oynatabilir."],
+["Yeşil yapraklardan ve altın tellerden örülmüş bir taç kadife bir yastığın üstünde duruyor, çevredeki orman sessizce başını eğmiş. Bu kart otoritenin kartı: liderlik, söz sahibi olma ya da sorumluluk alma zamanı geliyor. Gücünü şefkatle kullanırsan insanlar seni gönülden izler. Taç ağırdır, taşımayı bil.","Taç eğri duruyor, yaprakları kurumuş ve altın matlaşmış. Bu kart gücün kötüye kullanıldığına işaret ediyor: kontrol etmek isterken insanları kaybedebilirsin ya da biri senin üzerinde baskı kuruyor olabilir. Her iki durumda da sınırlarını ve gücünü tartman gerek. Zorbalık hiçbir zaman taç sayılmaz."],
+["Geniş dallı yaşlı bir ağacın tam ortasında pembe bir kalp açmış, çevresinde çiçekler ve dalda iki küçük kuş var. Bu kart aşkın kartı: sana yaklaşan bir sevgi var, belki yeni biri belki de eski bir sevginin yeniden canlanması. Kalbin kapıyı çalıyor, güvenle ve nazikçe aç. Bu sevgi yavaş ama kök salarak gelecek.","Ağacın kalbi çatlamış, yapraklar tek tek dökülüyor ve dalda yalnız bir kuş kalmış. Bu kart kalp kırıklığını gösteriyor: bir sevgi sınanıyor ya da bitiyor. Hayal kırıklığı canını yakıyor biliyorum ama bu da geçecek. Kalbini kapatma, iyileşmesi için ona zaman tanı."],
+["Altın bir çark gecenin içinde ağır ağır dönüyor, kollarında yıldızlar ve takvim işaretleri var. Bu kart değişimin kartı: yukarıdaki aşağı iner, aşağıdaki yukarı çıkar. Şu an ne yaşıyorsan geçici ve dönüş senin lehine. Direnmeden uyum sağlarsan çark seni yukarı taşır.","Çark çamura saplanmış, dişliler takılıyor ve gıcırdıyor. Bu kart değişimi senin engellediğini söylüyor: kötü bir dönem uzuyor gibi hissetsen de bunda senin elinde olan bir pay var. Direndikçe çark daha çok sürtünür. Bir şeyi bırak, çark kendiliğinden döner."],
+["Yeşil yapraklar bir rüzgarın girdabında dönüyor, mavi bir gökyüzü açılıyor ve uzakta bir kuş sürüsü yön değiştiriyor. Bu kart hareketin kartı: yakında bir yolculuk, bir taşınma ya da bir fikir değişikliği olabilir. Eski yükleri rüzgara ver, geride bırak. Hava değişiyor, hazır ol.","Rüzgar yönünü şaşırmış, yapraklar her yöne savruluyor ve ufuk bulanık. Bu kart savrulmayı gösteriyor: nereye gittiğini tam bilmiyorsun ve çevrendeki her söz seni başka yöne çekiyor. Önce bir çapa bul, bir hedef ya da bir değer, sonra yelken aç."],
+["Mor bir bulutun içinden sarı bir yıldırım yarılıyor, gökyüzü bir an gündüz gibi aydınlanıyor ve yer titriyor. Bu kart sarsıntının kartı: ani bir haber ya da değişim geliyor. Eskiyen bir yapı yıkılacak, yerine sağlamı gelecek. Korkma canım, yıldırımdan sonra hava hep temizlenir.","Yıldırım yere düşmeden önce havada asılı kalmış, gökyüzü gerilmiş ve bir şey patlamak üzere. Bu kart kaçınılan bir yıkımı gösteriyor: görmezden geldiğin çatlak büyüyor. Geciktirmek şiddetini artırır. Çatlak duvarı şimdi onar, sonra tamir etmek zor olur."],
+["Gece ormanında kırmızı beyaz benekli mantarlar bir halka oluşturmuş, ortasında hafif bir peri tozu parlıyor ve havada tatlı bir müzik var gibi. Bu kart büyünün kartı: gizli bir şans ya da şaşırtıcı bir tesadüf yolda. Gözüne değil hissine güven, küçük mucizelere açık ol. Bu halkaya girmeyi göze alan şanslıdır.","Halka sevimli görünüyor ama içine girersen çıkmak zor, mantarların altı karanlık. Bu kart bir tuzak uyarısı: cazip görünen bir şey seni oyalıyor ya da gerçek hedefinden uzaklaştırıyor. Gözünü açık tut, her büyü güzel değildir. Kolay gelen her şeye bir kez daha bak."],
+["Antik bir kum saati ahşap bir masada duruyor, üst odadaki kumlar ince altın bir şerit hâlinde akıyor. Bu kart zamanın kartı: ertelediğin bir konu için son çağrı yapılıyor. Ama telaş etme, doğru zamanı kalbin bilir. Bu kart bugünü kıymetlendirmeni istiyor.","Kum saati devrilmiş, kumlar yere dökülüyor ve zaman hızlanmış gibi. Bu kart geç kalmayı gösteriyor: zaman kaybı seni sıkıştırıyor. Yapmak istediğin bir şey için vaktin daralıyor. Küçük de olsa bugün bir adım at, tamamını yapmak zorunda değilsin."],
+["Uzun pelerinli bir yolcu elinde küçük bir fenerle ormanın içinde bir patikada yürüyor, arkasında ay ve önünde sis var. Bu kart yolculuğun kartı: hayatında bir yola çıkıyorsun, yalnız gibi görünsen de bu yolun bir sonu ve seni bekleyen biri var. Hafif çık, gerekli şeyleri yolda öğrenirsin. Fener yetecek kadar yanıyor.","Yolcunun feneri sönmüş, patika sisin içinde kaybolmuş ve yön duygusu bozulmuş. Bu kart kayboluşu gösteriyor: nereye gittiğini bilemiyorsun. Durup bir nefes al, haritaya bak ya da yol bilen birine danış. Kaybolmak bir son değil, yeniden yön bulmak için bir fırsat."],
+["Parlak kanatlı küçük bir peri havada yaprakların üstünde dans ediyor, her adımında ışık tozları saçılıyor ve çevredeki çiçekler açılıyor. Bu kart neşenin kartı: hafiflik, oyun ve küçük mucizeler seni arıyor. Fazla ciddiye aldığın bir şey var, biraz gül. Neşe seni bulmak istiyor.","Perinin kanatları dağılmış ve dansı taşkınlığa dönmüş. Bu kart sorumsuzluğu gösteriyor: oyun oynarken önemli bir şeyi ihmal ediyor olabilirsin. Eğlenmek güzel ama yükümlülükler beklemez. Biraz ciddiyet, biraz denge gerek."],
+["Bir mağarada ahşap bir sandığın kapağı aralanmış, içinden altın paralar ve parıltılar dökülüyor, çevredeki taşlar sarı ışıkla yıkanmış. Bu kart bolluğun kartı: maddi ya da manevi bir kazanç görüyorum. Bir iş, bir hediye ya da bir fırsat olabilir. Paylaşırsan çoğalır, unutma.","Sandık boş, kapağı devrik ve kilidi kırılmış, içeri yalnızca gölge giriyor. Bu kart kıtlığı gösteriyor: para konusunda dikkatli ol, savurganlık ya da beklenmedik bir kayıp olabilir. Cimrilik de çözüm değil, dengeyi bul. Kaynaklarını koru ve bilmediğin yere harcama."],
+["Gümüş bir yüzük kadife bir zeminin üstünde duruyor, taşı ay ışığında mavi mavi parlıyor ve çevresinde hafif bir halka ışık var. Bu kart sözün ve bağlılığın kartı: hayatında bir söz verilecek ya da tutulacak. Kalpten verilen söz kutsaldır. Sözünü tut ve tutulmasını bekle.","Yüzük çatlamış, taşı yerinden oynamış ve gümüşü matlaşmış. Bu kart bozulan bir sözü gösteriyor: bağlılık sarsılmış, bir güven sorunu var. Konuşmadan bir şeyin kendiliğinden düzelmeyeceğini biliyorsun. Yüzüğü çıkarmadan önce açıkça konuşun."],
+["Gökyüzüne uzanan taş basamaklar dolunaya doğru çıkıyor, her basamağın kenarında ışıklı bir yosun var. Bu kart yükselişin kartı: basamak basamak yukarı çıkıyorsun ve bu yavaş ama sağlam bir yükseliş. Yükselmek emek ister. Aşağı bakma, bir sonraki basamağa bak.","Basamaklar kaygan, bazıları kırık ve en üstte sis var. Bu kart kayma korkusunu gösteriyor: yükselmek yerine düşüyormuş gibi hissediyorsun. Acele ederek çıkma, sağlam adım at. Özgüvenini topla, bu merdiven seni taşır."],
+["Karanlık bir ormanın içinde bir sürü parlak göz sana bakıyor, ağaç gövdeleri onlara siper olmuş. Bu kart korkunun kartı: korktuğun şeyin çoğu hayalinde büyümüş. Ormanın gölgesi seni yemez, gözler yalnızca merak ediyor. Işığını yak ve yürü.","Gözler birer birer kapanıyor, karanlık çekiliyor ve patika belirginleşiyor. Bu kart korkunun aşıldığını gösteriyor: korktuğun şeyin zararsız olduğunu fark ediyorsun. Yine de ihtiyatı elden bırakma ama artık yürümekten çekinme."],
+["Yeşil bir vadiden altın rengi bir nehir akıyor, kıyıları ışıl ışıl ve suyun üstünde yapraklar süzülüyor. Bu kart bereketin kartı: emeğinin ve sabrının ödülü yolda. Maddi bir kazanç ya da bir bolluk görüyorum. Kürek çekmeyi bırakma, nehir seni taşıyor.","Nehir yatağı daralmış, su çekiliyor ve çakıllar görünüyor. Bu kart azalan bereketi gösteriyor: harcamalara ve geleceğe dikkat et. Küçük tasarruflar büyük fark yaratır. Beklediğin kazanç gecikebilir, bu yüzden hazırlıklı ol."],
+["Bir fırtınanın ardından gökyüzünde parlak bir gökkuşağı belirmiş, ucu ormanın içine inmiş ve yapraklar damlalarla parlıyor. Bu kart mutluluğun ve onarımın kartı: zor bir dönemin ardından ödül geliyor. Dilek, sevinç ve rahatlama yaklaşıyor. Kabul et, bunu hak ettin.","Gökkuşağı sönük, renkler solgun ve bulutlar hâlâ dağılmamış. Bu kart gölgelenmiş mutluluğu gösteriyor: beklediğin sevinç gecikiyor. Yine de bulut geçince renkler geri gelir. Sabret, güneş çıkacak."]
+];
+C.forEach((c,i)=>{c.rk=RV[i][0];c.m=LONG[i][0];c.rm=LONG[i][1]});
+const N=C.length;
+function art(i,rev){return '<svg viewBox="0 0 120 180" role="img" aria-label="'+C[i].n+(rev?' (ters)':'')+'"'+(rev?' style="transform:rotate(180deg)"':'')+'>'+S[i]()+frame(C[i].ac)+'</svg>'}
+const BACK='<svg viewBox="0 0 120 180" aria-hidden="true">'+sky(20,'#120a26','#2a1650')+stars(40,36,170,'#c9a7ff')+'<g fill="none" stroke="#d8b86a" stroke-width="1"><circle cx="60" cy="90" r="30"/><circle cx="60" cy="90" r="22" stroke-opacity="0.6"/><path d="M60 52L66 84L98 90L66 96L60 128L54 96L22 90L54 84Z" fill="#d8b86a" fill-opacity="0.18"/></g><path d="M64 78A14 14 0 1 0 64 102A11 11 0 1 1 64 78Z" fill="#d8b86a"/>'+sp(30,30,3,'#d8b86a')+sp(92,150,3,'#d8b86a')+frame('#d8b86a')+'</svg>';
+
+const $=id=>document.getElementById(id);
+const screens=['home','shuffle','count','pick','result','lib','detail'];
+let deck=[],want=3,sel=[],drawn=[],tmr=null,libBuilt=false,dIdx=0,dRev=false;
+const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function go(name){
+  clearTimeout(tmr);
+  screens.forEach(s=>{$('s-'+s).hidden=(s!==name)});
+  const lib=(name==='lib'||name==='detail');
+  $('n-fal').setAttribute('aria-current',lib?'false':'page');
+  $('n-lib').setAttribute('aria-current',lib?'page':'false');
+  window.scrollTo(0,0);
+  const h=$('s-'+name).querySelector('h1,h2');
+  if(h)h.focus({preventScroll:true});
+}
+function shuffleDeck(){
+  deck=[...Array(N).keys()];
+  for(let i=N-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]]}
+  sel=[];
+}
+function startShuffle(){
+  shuffleDeck();
+  go('shuffle');
+  $('shuffle-msg').textContent='Gözlerini kapat ve niyetini aklından geçir.';
+  tmr=setTimeout(()=>{$('shuffle-msg').textContent='Kartlar hazır.';tmr=setTimeout(()=>go('count'),reduce?300:700)},reduce?900:2600);
+}
+function buildPick(){
+  const g=$('pgrid');g.innerHTML='';
+  deck.forEach((ci,pos)=>{
+    const b=document.createElement('button');
+    b.className='pk';b.type='button';b.setAttribute('aria-label','Kapalı kart '+(pos+1));
+    b.innerHTML=BACK+'<span class="bd"></span>';
+    b.onclick=()=>toggle(pos);
+    g.appendChild(b);
+  });
+  updatePick();
+}
+function updatePick(){
+  const bs=$('pgrid').children;
+  for(let i=0;i<bs.length;i++){
+    const k=sel.indexOf(i);
+    bs[i].classList.toggle('sel',k>-1);
+    bs[i].querySelector('.bd').textContent=k>-1?(k+1):'';
+    bs[i].setAttribute('aria-pressed',k>-1?'true':'false');
+  }
+  $('pick-count').textContent=sel.length+' / '+want;
+  $('pick-title').textContent=want+' kart seç';
+}
+function toggle(pos){
+  const k=sel.indexOf(pos);
+  if(k>-1){sel.splice(k,1);$('pick-msg').textContent=''}
+  else if(sel.length<want){sel.push(pos);$('pick-msg').textContent=''}
+  else{$('pick-msg').textContent='En fazla '+want+' kart seçebilirsin. Birini bırakıp başkasını seç.'}
+  updatePick();
+}
+function labels(n){
+  if(n===1)return ['Günün mesajı'];
+  if(n===3)return ['Geçmişin','Şimdin','Geleceğin'];
+  return ['Ruh halin','Önündeki engel','Sana destek olan','Falcının tavsiyesi','Olası sonuç'];
+}
+function assignRev(n){
+  const r=Array.from({length:n},()=>Math.random()<0.35);
+  return r;
+}
+function reveal(){
+  if(sel.length<want){$('pick-msg').textContent='Önce '+want+' kart seç. Şu an '+sel.length+' kart seçtin.';return}
+  const revs=assignRev(want);
+  drawn=sel.map((pos,i)=>({ci:deck[pos],rev:revs[i]}));
+  buildResult();
+  go('result');
+}
+function buildResult(){
+  const q=$('q').value.trim();
+  $('r-q').textContent=q?('Sorun: '+q):(want+' kartlık açılım');
+  const L=labels(want),box=$('items');box.innerHTML='';
+  $('summary').innerHTML='';
+  sumParas=null;
+  drawn.forEach((d,i)=>{
+    const c=C[d.ci],it=document.createElement('div');
+    it.className='item'+(d.rev?' rev':'');
+    it.innerHTML='<div class="flip" role="button" tabindex="0" aria-label="'+L[i]+' kartını çevir"><div class="fi"><div class="ff back">'+BACK+'</div><div class="ff front">'+art(d.ci,d.rev)+'</div></div></div>'
+      +'<div class="itxt"><span class="lbl">'+L[i]+'</span><p class="pre">Karta dokun ve çevir.</p>'
+      +'<div class="post" hidden><div class="name">'+c.n+(d.rev?'<span class="tag">Ters</span>':'')+'</div><div class="kw">'+(d.rev?c.rk:c.k)+'</div><p class="mean">'+(d.rev?c.rm:c.m)+'</p></div></div>';
+    const fl=it.querySelector('.flip');
+    const open=()=>{if(fl.classList.contains('open'))return;fl.classList.add('open');it.querySelector('.pre').hidden=true;it.querySelector('.post').hidden=false;fl.setAttribute('aria-label',c.n+(d.rev?' (ters)':''));checkAll()};
+    fl.onclick=open;
+    fl.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}};
+    box.appendChild(it);
+  });
+}
+function openAll(){
+  document.querySelectorAll('#items .flip').forEach((fl,i)=>{setTimeout(()=>fl.click(),reduce?0:i*350)});
+}
+function checkAll(){
+  const all=[...document.querySelectorAll('#items .flip')].every(x=>x.classList.contains('open'));
+  if(all&&!$('summary').innerHTML)showSummary();
+}
+const WARN=[8,17,29,35,37,43];
+let sumParas=null;
+const pickOne=a=>a[Math.floor(Math.random()*a.length)];
+const lc=s=>s.toLocaleLowerCase('tr-TR');
+function toneOf(d){const w=WARN.includes(d.ci);if(!d.rev)return w?0:1;return(d.ci===17||d.ci===43)?1:-1}
+function kwOf(d){const c=C[d.ci];return lc(d.rev?c.rk:c.k)}
+function fill(t,d){return t.split('{nm}').join(C[d.ci].n).split('{kw}').join(kwOf(d))}
+const T3=[
+["Geçmişinde {nm} duruyor. Yaşadığın bir dönemde \"{kw}\" senin için belirleyici olmuş ve bugün hâlâ o izi taşıyorsun; bu iz seni yıprattığı kadar güçlendirdi de, sandığından fazla.","Geçmişinde {nm} ters duruyor. \"{kw}\" konusunda çözülmemiş, yarım kalmış bir şey var ve şimdiki ruh hâlini sessizce etkiliyor; onu kapatmadan ilerlemek zor olacak."],
+["Şu an {nm} kartının gölgesinde yürüyorsun. \"{kw}\" bugünkü hayatının tam ortasında duruyor ve çevrendekiler fark etmese de bunu en iyi sen biliyorsun.","Şu anın kartı {nm} ters geldi. \"{kw}\" bu günlerde seni zorluyor ve belki de farkında olmadan o yükü sırtında taşıyorsun; bunu bir an önce adlandırmak seni rahatlatacak."],
+["Önünde {nm} seni bekliyor. \"{kw}\" yaklaşıyor ve bu gidişle yolun seni oraya çıkaracak; bu iyi bir işaret, yalnızca adımlarını sakin at.","Geleceğinde {nm} ters çıktı. \"{kw}\" bir uyarı olarak gelecek ama bu bir kader değil bir ihtimal; bugün alacağın küçük kararlar bu ihtimali değiştirebilir."]
+];
+const T5=[
+["Ruh hâlin {nm} ile konuşuyor. İçinde \"{kw}\" duygusu var ve bunu kimseye söylememiş olsan da gözlerinden okunuyor.","Ruh hâlin {nm} ters duruyor. \"{kw}\" konusunda içine kapanmışsın ve belki kendine bile itiraf etmediğin bir yük taşıyorsun."],
+["Önündeki engel olarak {nm} çıktı: seni zorlayan şey \"{kw}\" ile ilgili. Düz geldiği için bu aşılabilir bir engel, hatta sana bir şey öğretmek için orada duruyor.","Seni yavaşlatan şey {nm} kartının ters yüzü, yani \"{kw}\". Bu engel dışarıdan çok kendi içindeki bir tereddüte benziyor ve kendin kaldırmadıkça yerinde kalacak."],
+["Sana destek olan güç {nm}: \"{kw}\" enerjisi arkanda duruyor, görünmez bir el gibi seni ileri itiyor ve sen zorlandığında hep orada.","Destek beklediğin yerde {nm} ters geldi. \"{kw}\" konusunda yardımın geldiği yönü bir kez daha sorgula, uzanan her el sağlam olmayabilir; asıl desteği kendi içinde ara."],
+["Falcının tavsiyesi {nm} kartında saklı: \"{kw}\". Bunu somut bir adıma çevir ve bu hafta içinde küçük de olsa bir şey yap, kart senden eylem bekliyor.","Tavsiye kartın ters geldi: {nm}. \"{kw}\" konusunda şimdilik geri çekilmeni, acele etmemeni ve önce iç sesini dinlemeni söylüyor."],
+["Sonuçta seni {nm} bekliyor, yani \"{kw}\". Bu gidişle yolun buraya çıkıyor ve bu güzel bir haber.","Sonuç kartın {nm} ters: \"{kw}\" ihtimali belirgin. Bu bir hüküm değil uyarı, çünkü ters kartlar yönün değiştirilebileceğini gösterir."]
+];
+const MOOD={
+bright:["Masaya serdiğim kartlara bütün olarak bakınca ortada aydınlık bir hava görüyorum. Kartların çoğu senden yana konuşuyor, bu da hayatında bir kapının açılmak üzere olduğunu gösteriyor.","Kartların dizilişi bana ılık bir rüzgar gibi geliyor. Enerjin yükseliyor ve çevrendeki şartlar yavaş yavaş senin lehine dönüyor."],
+mixed:["Kartların arasında hem ışık hem gölge var, tıpkı gerçek hayat gibi. Düz kartlar gücünü, ters kartlar dikkat etmen gereken yerleri gösteriyor ve ikisini birlikte okuyunca yol belli oluyor.","Bu açılımda dengeli bir enerji görüyorum: bazı şeyler yolunda, bazıları seni bekletiyor. Bu normal, çünkü hiçbir değişim sorunsuz gelmez."],
+heavy:["Kartlar bu sefer biraz ağır konuşuyor, bunu gizlemeyeceğim. Ama ters kartlar kader değil, bir uyarı lambası; neyi değiştirmen gerektiğini sana önceden gösteriyorlar.","Gölge kartlar çoğunlukta ve bu seni korkutmasın. Bu dönem yorucu olabilir ama kartlar bunu önceden gösteriyorsa hazırlık yapmak ve kendini korumak için vaktin var demektir."]
+};
+const CLOSE={
+bright:"{time} bu kartların söylediklerinin ilk işaretlerini göreceksin. Sezgin seni yanıltmıyor, ona güven. Kapıyı açacak olan sensin, bu yüzden bir adım at ve karşına çıkan ilk fırsata hayır deme.",
+mixed:"{time} bazı şeylerin netleştiğini fark edeceksin. Düz kartların gücüne yaslan, ters kartların uyardığı noktada ise bir kez daha düşün. İkisini birlikte tutarsan yolun açılır.",
+heavy:"{time} biraz yorulabileceğini hissedebilirsin ama bu geçici. Ters kartların işaret ettiği yeri onar, kendine nazik davran ve acele karar verme. Bu fal bir son değil, bir hazırlık."
+};
+const CLOSE1={
+bright:"{time} bu kartın küçük işaretlerini göreceksin. Bugün sana bir kapı aralanıyor; sezgine güven ve karşına çıkan ilk fırsata hayır deme.",
+mixed:"Bu kart bir uyarı kadar bir öğüt de taşıyor. Bugün acele etme, karşına çıkan ikinci seçeneğe de bak ve akşam olduğunda içinden gelen sese kulak ver.",
+heavy:"Bugün kendine karşı biraz nazik ol. Bu kart bir hüküm değil, dikkat et diyen bir fısıltı; ertelediğin küçük bir şeyi bugün halletmek içini rahatlatacak."
+};
+const TIMES=["Önümüzdeki on beş gün içinde","Bu ayın sonuna doğru","Ay dolunaya yaklaşırken","Bu hafta içinde","Önümüzdeki üç hafta içinde"];
+function summaryParas(){
+  if(sumParas)return sumParas;
+  const n=drawn.length,q=$('q').value.trim();
+  const rev=drawn.filter(d=>d.rev).length,up=n-rev;
+  const score=drawn.reduce((s,d)=>s+toneOf(d),0)/n;
+  const mood=score>=0.4?'bright':(score<=-0.1?'heavy':'mixed');
+  const time=pickOne(TIMES);
+  const P=[];
+  if(n===1){
+    const d=drawn[0],c=C[d.ci];
+    P.push('Bugünün kartı '+c.n+'. '+(d.rev?(toneOf(d)>0?'Ters geldi ama bu kez ters yüzü sana iyi bir şey anlatıyor.':'Ters geldi, yani bugün kartın ışığından çok gölgesine kulak vermen gerekiyor.'):'Düz geldi, yani söylediğini olduğu gibi alabilirsin.'));
+    P.push('Bu kartın bugün sana fısıldadığı kelime "'+kwOf(d)+'". Gün içinde karşına çıkan küçük bir olay, bir cümle ya da bir rastlantı bu kelimeyi sana hatırlatacak; dikkat edersen göreceksin.');
+    P.push((q?'Sorduğun "'+q+'" konusunda bu kart şunu söylüyor: ':'')+CLOSE1[mood].split('{time}').join(time));
+    P.push('Kartlar tahmin etmez, işaret eder. Gerisi senin ellerinde.');
+  }else{
+    const T=n===3?T3:T5;
+    P.push('Masaya serdiğim '+n+' kartın '+up+' tanesi düz, '+rev+' tanesi ters geldi. '+pickOne(MOOD[mood]));
+    drawn.forEach((d,i)=>{const useUp=!d.rev||toneOf(d)>0;P.push(fill(T[i][useUp?0:1],d))});
+    const a=drawn[0],b=drawn[n-1];
+    P.push('Hikâyenin başında '+C[a.ci].n+', sonunda '+C[b.ci].n+' duruyor; yani "'+kwOf(a)+'" hâlinden "'+kwOf(b)+'" hâline doğru yürüyorsun. Aradaki kartlar bu yolculuğun nasıl geçeceğini anlatıyor.');
+    P.push((q?'Sorduğun "'+q+'" konusuna gelirsek: ':'')+CLOSE[mood].split('{time}').join(time));
+    P.push('Unutma, kartlar kaderi yazmaz, yönü gösterir. Pusulayı tutan sensin.');
+  }
+  sumParas=P;return P;
+}
+function showSummary(){
+  const box=$('summary');box.innerHTML='';
+  const w=document.createElement('div');w.className='sum';
+  const e=document.createElement('span');e.className='eyebrow';e.textContent='Kartların birleşimi';
+  const h=document.createElement('h3');h.textContent='Falcı konuşuyor';
+  w.appendChild(e);w.appendChild(h);
+  summaryParas().forEach((t,i)=>{const p=document.createElement('p');p.className='mean';p.textContent=t;p.style.animationDelay=(reduce?0:i*0.35)+'s';w.appendChild(p)});
+  box.appendChild(w);
+  if(!reduce)w.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function copyText(){
+  const q=$('q').value.trim(),L=labels(drawn.length);
+  let t='Orman Falcısı\n'+(q?'Sorum: '+q+'\n':'')+'\n';
+  drawn.forEach((d,i)=>{const c=C[d.ci];t+=L[i]+': '+c.n+(d.rev?' (ters)':'')+' - '+(d.rev?c.rk:c.k)+'\n'+(d.rev?c.rm:c.m)+'\n\n'});
+  t+='Kartların birleşimi\n\n'+summaryParas().join('\n\n');
+  return t;
+}
+function toast(m){const t=$('toast');t.textContent=m;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>{t.hidden=true},2200)}
+function doCopy(){
+  const t=copyText();
+  const fb=()=>{const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}document.body.removeChild(ta);toast(ok?'Fal kopyalandı':'Kopyalanamadı, metni elle seç')};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(()=>toast('Fal kopyalandı'),fb)}else fb();
+}
+
+function buildLib(){
+  if(libBuilt)return;libBuilt=true;
+  const g=$('lgrid');
+  C.forEach((c,i)=>{
+    const b=document.createElement('button');b.className='lib';b.type='button';
+    b.innerHTML=art(i,false)+'<span>'+c.n+'</span>';
+    b.onclick=()=>showDetail(i);
+    g.appendChild(b);
+  });
+}
+function showDetail(i){
+  dIdx=(i+N)%N;dRev=false;renderDetail();go('detail');
+}
+function renderDetail(){
+  const c=C[dIdx];
+  $('d-art').innerHTML=art(dIdx,dRev);
+  $('d-up').setAttribute('aria-pressed',!dRev);
+  $('d-rev').setAttribute('aria-pressed',dRev);
+  $('d-txt').innerHTML='<div class="name">'+c.n+(dRev?'<span class="tag">Ters</span>':'')+'</div><div class="kw" style="color:'+(dRev?'var(--rose)':'var(--gold)')+'">'+(dRev?c.rk:c.k)+'</div><p class="mean">'+(dRev?c.rm:c.m)+'</p>';
+}
+
+$('b-start').onclick=startShuffle;
+$('b-guide').onclick=()=>{buildLib();go('lib')};
+$('n-fal').onclick=()=>go('home');
+$('n-lib').onclick=()=>{buildLib();go('lib')};
+document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{want=+b.dataset.n;sel=[];buildPick();go('pick')});
+$('b-reveal').onclick=reveal;
+$('b-clear').onclick=()=>{sel=[];$('pick-msg').textContent='';updatePick()};
+$('b-reshuffle').onclick=startShuffle;
+$('b-all').onclick=openAll;
+$('b-copy').onclick=doCopy;
+$('b-again').onclick=startShuffle;
+$('b-back').onclick=()=>go('lib');
+$('d-up').onclick=()=>{dRev=false;renderDetail()};
+$('d-rev').onclick=()=>{dRev=true;renderDetail()};
+$('d-prev').onclick=()=>{dIdx=(dIdx-1+N)%N;renderDetail();window.scrollTo(0,0)};
+$('d-next').onclick=()=>{dIdx=(dIdx+1)%N;renderDetail();window.scrollTo(0,0)};
+document.querySelectorAll('.fan .c').forEach(e=>e.innerHTML=BACK);
+document.querySelectorAll('.stack .c').forEach(e=>e.innerHTML=BACK);
+</script>
