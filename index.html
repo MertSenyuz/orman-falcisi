@@ -49,6 +49,7 @@ h3{font-size:22px}
 p{margin:0}
 .muted{color:var(--muted)}
 .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
+[hidden]{display:none!important}
 .scr[hidden]{display:none!important}
 .scr{display:flex;flex-direction:column;gap:18px;animation:in .45s ease both}
 @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -96,7 +97,7 @@ svg{display:block}
 .opt .n{font-family:var(--font-display);font-size:44px;line-height:1;color:var(--gold);min-width:34px;text-align:center}
 .opt b{display:block;font-size:16px}
 .opt span{display:block;font-size:14px;color:var(--muted)}
-label{font-size:14px;color:var(--muted);display:block;margin-bottom:6px}
+label,.lab{font-size:14px;color:var(--muted);display:block;margin-bottom:6px}
 input[type=text]{
   width:100%;min-height:46px;border-radius:12px;border:1px solid var(--line);background:var(--panel);
   color:var(--fg);padding:0 14px;font:400 16px var(--font-body)
@@ -150,6 +151,59 @@ input::placeholder{color:#7d70a0}
 .dcard{width:190px;max-width:60%;margin:0 auto}
 .dcard svg{width:100%;height:auto;border-radius:10px;transition:transform .5s}
 
+
+/* Üst çubuk ve ses */
+.top{display:flex;justify-content:flex-end;margin-bottom:-6px}
+.snd{min-height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);font:700 13px var(--font-body);cursor:pointer}
+.snd[aria-pressed="true"]{color:var(--gold);border-color:var(--gold)}
+.snd:focus-visible,.chip:focus-visible,.hold:focus-visible,.hitem:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* Sis */
+body::before{content:"";position:fixed;inset:-25%;z-index:-1;pointer-events:none;
+  background:radial-gradient(40% 30% at 20% 30%,rgba(143,104,216,.16),transparent 70%),radial-gradient(35% 28% at 80% 70%,rgba(255,138,166,.09),transparent 70%);
+  animation:drift 36s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translate3d(-3%,-2%,0)}to{transform:translate3d(4%,3%,0)}}
+
+/* Konu seçimi */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:42px;padding:0 18px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--fg);font:700 15px var(--font-body);cursor:pointer}
+.chip:hover{border-color:var(--gold)}
+.chip[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:var(--gold-ink)}
+.tnote{font-size:15px;color:var(--muted);border-left:2px solid var(--gold);padding-left:10px;margin-top:2px}
+.tnote b{color:var(--gold);font-weight:700}
+
+/* Niyet ritüeli */
+.hold{position:relative;width:156px;height:156px;border-radius:50%;border:0;color:var(--gold);font:700 15px var(--font-body);cursor:pointer;
+  touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;display:grid;place-items:center;margin:8px auto;
+  background:radial-gradient(circle,rgba(216,184,106,calc(.10 + var(--p,0)*.32)),transparent 70%)}
+.hold:disabled{cursor:default}
+.hold .ring{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.hold .ring circle{fill:none;stroke-width:3}
+.hold .ring .bg{stroke:var(--line)}
+.hold .ring .pr{stroke:var(--gold);stroke-linecap:round;stroke-dasharray:276.46;stroke-dashoffset:276.46}
+.hold span{position:relative}
+#s-shuffle .stack{height:220px;transform:scale(calc(1 + var(--p,0)*.06));filter:drop-shadow(0 0 calc(var(--p,0)*26px) rgba(216,184,106,.6))}
+#s-shuffle .stack .c{animation:none}
+#s-shuffle.live .stack .c:nth-child(odd){animation:riffleA 1.1s ease-in-out infinite}
+#s-shuffle.live .stack .c:nth-child(even){animation:riffleB 1.1s ease-in-out infinite}
+
+/* Günün kartı */
+.flip.big{width:200px;max-width:62%;flex:none;margin:0 auto}
+
+/* Geçmiş */
+.hitem{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;text-align:left;color:var(--fg);cursor:pointer;font-family:var(--font-body);width:100%}
+.hitem:hover{border-color:var(--gold)}
+.hmeta{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted);font-weight:700}
+.hmini{display:flex;gap:8px;overflow:hidden}
+.hmini>div{width:46px;flex:0 0 46px}
+.hmini svg{width:100%;height:auto;border-radius:5px}
+.hnames{font-size:15px}
+
+/* Paylaşım penceresi */
+.modal{position:fixed;inset:0;background:rgba(8,5,20,.9);z-index:20;overflow:auto;padding:16px}
+.modal .box{max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.modal img{width:100%;height:auto;border-radius:12px;border:1px solid var(--line)}
+
 /* Alt menü */
 nav{
   position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);
@@ -168,11 +222,13 @@ nav button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
   .stack .c{animation:none!important}
   .fi{transition:none}
   .pk{transition:none}
+  body::before{animation:none}
 }
 </style>
 </head>
 <body>
 <main>
+  <div class="top"><button class="snd" id="b-snd" type="button" aria-pressed="true">Ses açık</button></div>
   <section class="scr" id="s-home">
     <div class="fan" aria-hidden="true"><div class="c"></div><div class="c"></div><div class="c"></div></div>
     <div class="hero-copy">
@@ -180,23 +236,41 @@ nav button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
       <h1 tabindex="-1">Orman Falcısı</h1>
       <p class="muted">Niyetini tut, kartlarını seç, falcı anlatsın. Bazı kartlar ters gelir ve ters gelen kart aynı şeyi söylemez, bazen bir uyarı taşır.</p>
     </div>
+    <div>
+      <label for="nm">Adın (falcı sana adınla seslensin)</label>
+      <input type="text" id="nm" maxlength="20" placeholder="Adını yaz" autocomplete="given-name">
+    </div>
     <div class="row">
       <button class="btn primary" id="b-start">Fala başla</button>
-      <button class="btn" id="b-guide">Kartları tanı</button>
+      <button class="btn" id="b-daily">Bugünün kartını aç</button>
     </div>
+    <div class="row"><button class="btn" id="b-guide">Kartları tanı</button></div>
+    <p class="muted" id="last" style="font-size:14px"></p>
+    <p class="muted" style="font-size:13px">Eğlence amaçlıdır; önemli kararlarını kartlara bırakma.</p>
   </section>
 
   <section class="scr center" id="s-shuffle" hidden>
-    <span class="eyebrow">Birazdan başlıyoruz</span>
-    <h2 tabindex="-1">Kartlar karıştırılıyor</h2>
+    <span class="eyebrow">Niyet zamanı</span>
+    <h2 tabindex="-1">Niyetini tut</h2>
     <div class="stack" aria-hidden="true"><div class="c"></div><div class="c"></div><div class="c"></div><div class="c"></div><div class="c"></div></div>
-    <p class="muted" role="status" id="shuffle-msg">Gözlerini kapat ve niyetini aklından geçir.</p>
+    <button class="hold" id="hold" type="button" aria-describedby="shuffle-msg"><svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="bg" cx="50" cy="50" r="44"/><circle class="pr" id="hring" cx="50" cy="50" r="44"/></svg><span id="hold-t">Basılı tut</span></button>
+    <p class="muted" role="status" id="shuffle-msg" style="max-width:34ch">Elini düğmenin üstünde tut ve niyetini düşün.</p>
+    <button class="btn" id="b-skip" type="button">Atla</button>
   </section>
 
   <section class="scr" id="s-count" hidden>
     <div>
       <span class="eyebrow">Kartlar hazır</span>
       <h2 tabindex="-1" style="margin-top:6px">Kaç kart çekeceksin?</h2>
+    </div>
+    <div>
+      <div class="lab" id="tp-l">Neyi öğrenmek istiyorsun?</div>
+      <div class="chips" role="group" aria-labelledby="tp-l">
+        <button class="chip" type="button" data-t="genel" aria-pressed="true">Genel</button>
+        <button class="chip" type="button" data-t="ask" aria-pressed="false">Aşk</button>
+        <button class="chip" type="button" data-t="is" aria-pressed="false">İş</button>
+        <button class="chip" type="button" data-t="para" aria-pressed="false">Para</button>
+      </div>
     </div>
     <div>
       <label for="q">Aklındaki soru (isteğe bağlı)</label>
@@ -233,7 +307,8 @@ nav button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
     <div class="items" id="items"></div>
     <div id="summary"></div>
     <div class="row">
-      <button class="btn primary" id="b-copy">Sonucu kopyala</button>
+      <button class="btn primary" id="b-share">Görsel olarak paylaş</button>
+      <button class="btn" id="b-copy">Sonucu kopyala</button>
       <button class="btn" id="b-again">Yeniden fal bak</button>
     </div>
   </section>
@@ -254,13 +329,41 @@ nav button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
     <div class="itxt" id="d-txt"></div>
     <div class="row"><button class="btn" id="d-prev">Önceki kart</button><button class="btn" id="d-next">Sonraki kart</button></div>
   </section>
+
+  <section class="scr center" id="s-daily" hidden>
+    <div style="width:100%;text-align:left"><span class="eyebrow">Bugünün kartı</span><h2 tabindex="-1" style="margin-top:6px" id="dy-date"></h2></div>
+    <div id="dy-card" style="width:100%"></div>
+    <p class="muted" id="dy-pre">Bu kart bugün sana özel seçildi. Dokunup çevir.</p>
+    <div class="itxt" id="dy-post" hidden style="text-align:left;width:100%"></div>
+    <div class="row" id="dy-act" hidden style="width:100%"><button class="btn primary" id="dy-share" type="button">Görsel olarak paylaş</button><button class="btn" id="dy-fal" type="button">Tam fal bak</button></div>
+  </section>
+
+  <section class="scr" id="s-hist" hidden>
+    <div>
+      <span class="eyebrow">Bu cihazda saklanır</span>
+      <h2 tabindex="-1" style="margin-top:6px">Fal geçmişi</h2>
+      <p class="muted" style="margin-top:6px">Çektiğin son 30 fal burada. Birine dokunup yeniden oku.</p>
+    </div>
+    <p class="muted" id="h-empty" hidden>Henüz fal bakmadın. İlk falından sonra burada görünür.</p>
+    <div class="items" id="hlist"></div>
+    <div class="row"><button class="btn" id="h-clear" type="button" hidden>Geçmişi temizle</button></div>
+  </section>
 </main>
 
 <nav aria-label="Ana menü"><div class="in">
   <button id="n-fal" aria-current="page">Fal</button>
   <button id="n-lib">Kartlar</button>
+  <button id="n-hist">Geçmiş</button>
 </div></nav>
 <div class="toast" id="toast" hidden role="status"></div>
+<div class="modal" id="shm" hidden role="dialog" aria-modal="true" aria-labelledby="shm-t">
+  <div class="box">
+    <h3 id="shm-t">Paylaşım görseli</h3>
+    <img id="shm-img" alt="Falın paylaşım görseli">
+    <p class="muted" style="font-size:14px">Paylaş düğmesi çalışmazsa İndir'e bas ya da görsele uzun basıp kaydet.</p>
+    <div class="row"><button class="btn primary" id="shm-share" type="button">Paylaş</button><button class="btn" id="shm-dl" type="button">İndir</button><button class="btn" id="shm-x" type="button">Kapat</button></div>
+  </div>
+</div>
 
 <script>
 const rnd=s=>()=>(s=(s*9301+49297)%233280)/233280;
@@ -492,16 +595,74 @@ function art(i,rev){return '<svg viewBox="0 0 120 180" role="img" aria-label="'+
 const BACK='<svg viewBox="0 0 120 180" aria-hidden="true">'+sky(20,'#120a26','#2a1650')+stars(40,36,170,'#c9a7ff')+'<g fill="none" stroke="#d8b86a" stroke-width="1"><circle cx="60" cy="90" r="30"/><circle cx="60" cy="90" r="22" stroke-opacity="0.6"/><path d="M60 52L66 84L98 90L66 96L60 128L54 96L22 90L54 84Z" fill="#d8b86a" fill-opacity="0.18"/></g><path d="M64 78A14 14 0 1 0 64 102A11 11 0 1 1 64 78Z" fill="#d8b86a"/>'+sp(30,30,3,'#d8b86a')+sp(92,150,3,'#d8b86a')+frame('#d8b86a')+'</svg>';
 
 const $=id=>document.getElementById(id);
-const screens=['home','shuffle','count','pick','result','lib','detail'];
-let deck=[],want=3,sel=[],drawn=[],tmr=null,libBuilt=false,dIdx=0,dRev=false;
+const screens=['home','shuffle','count','pick','result','lib','detail','daily','hist'];
+let deck=[],want=3,sel=[],drawn=[],tmr=null,libBuilt=false,dIdx=0,dRev=false,topic='genel',curEntry=null,quiet=false;
 const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const TOPICS={genel:'Genel',ask:'Aşk',is:'İş',para:'Para'};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const lf=s=>s.charAt(0).toLocaleLowerCase('tr-TR')+s.slice(1);
+const getName=()=>$('nm').value.trim().slice(0,20);
+
+/* Depolama: tarayıcı izin vermezse bellekte tutar */
+const mem={};
+function sget(k,d){try{const v=localStorage.getItem(k);if(v!==null)return JSON.parse(v)}catch(e){}return k in mem?mem[k]:d}
+function sset(k,v){mem[k]=v;try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+const histAll=()=>sget('of_hist',[]);
+function histSave(e){const h=histAll().filter(x=>x.id!==e.id);h.unshift(e);sset('of_hist',h.slice(0,30))}
+
+/* Ses ve titreşim */
+let snd=sget('of_snd',true)!==false,AC=null,amb=null;
+function ac(){if(AC===null){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){AC=false}}if(AC&&AC.state==='suspended')AC.resume();return AC||null}
+function tn(fq,t0,dur,vol,type){const a=ac();if(!a)return;const o=a.createOscillator(),g=a.createGain(),t=a.currentTime+t0;o.type=type||'sine';o.frequency.value=fq;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+0.03);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+dur+0.05)}
+function whoosh(){const a=ac();if(!a)return;const n=Math.floor(a.sampleRate*0.22),b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);const sr=a.createBufferSource();sr.buffer=b;const fl=a.createBiquadFilter();fl.type='bandpass';fl.frequency.value=1800;fl.Q.value=0.8;const g=a.createGain();g.gain.value=0.08;sr.connect(fl);fl.connect(g);g.connect(a.destination);sr.start()}
+function sfx(k){if(!snd||quiet)return;try{
+  if(k==='tap')tn(560,0,0.12,0.05,'triangle');
+  else if(k==='flip'){whoosh();tn(660,0.05,0.35,0.04)}
+  else if(k==='chime'){[523.25,659.25,783.99,1046.5].forEach((fq,i)=>tn(fq,i*0.13,1.1,0.05))}
+}catch(e){}}
+function vibe(p){if(snd&&!quiet&&navigator.vibrate){try{navigator.vibrate(p)}catch(e){}}}
+function ambient(on){
+  try{
+    if(on){
+      if(!snd||amb)return;
+      const a=ac();if(!a)return;
+      const g=a.createGain(),lp=a.createBiquadFilter();
+      g.gain.setValueAtTime(0.0001,a.currentTime);lp.type='lowpass';lp.frequency.value=900;
+      lp.connect(g);g.connect(a.destination);
+      const os=[110,164.81,220,329.63].map((fq,i)=>{const o=a.createOscillator(),og=a.createGain();o.type=i%2?'triangle':'sine';o.frequency.value=fq;o.detune.value=(i-1.5)*6;og.gain.value=i>1?0.5:1;o.connect(og);og.connect(lp);o.start();return o});
+      g.gain.linearRampToValueAtTime(0.07,a.currentTime+2.5);
+      amb={g,os,a};
+    }else if(amb){
+      const m=amb;amb=null;
+      m.g.gain.cancelScheduledValues(m.a.currentTime);m.g.gain.setValueAtTime(Math.max(m.g.gain.value,0.0001),m.a.currentTime);m.g.gain.linearRampToValueAtTime(0.0001,m.a.currentTime+1.2);
+      setTimeout(()=>m.os.forEach(o=>{try{o.stop()}catch(e){}}),1400);
+    }
+  }catch(e){}
+}
+function paintSnd(){const b=$('b-snd');b.setAttribute('aria-pressed',snd);b.textContent=snd?'Ses açık':'Ses kapalı'}
+
+function setTopic(t){
+  topic=t;
+  document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.t===t?'true':'false'));
+}
+function todayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function refreshHome(){
+  const st=sget('of_daily',null),seen=st&&st.d===todayKey()&&st.seen;
+  $('b-daily').textContent=seen?'Bugünün kartına tekrar bak':'Bugünün kartını aç';
+  const h=histAll()[0];
+  $('last').textContent=h?('Son falın: '+new Date(h.t).toLocaleDateString('tr-TR',{day:'numeric',month:'long'})+' · '+(h.kind==='daily'?'Günün kartı':(TOPICS[h.topic]||'Genel')+', '+h.n+' kart')):'';
+}
 
 function go(name){
   clearTimeout(tmr);
   screens.forEach(s=>{$('s-'+s).hidden=(s!==name)});
-  const lib=(name==='lib'||name==='detail');
-  $('n-fal').setAttribute('aria-current',lib?'false':'page');
+  const lib=(name==='lib'||name==='detail'),his=(name==='hist');
+  $('n-fal').setAttribute('aria-current',(lib||his)?'false':'page');
   $('n-lib').setAttribute('aria-current',lib?'page':'false');
+  $('n-hist').setAttribute('aria-current',his?'page':'false');
+  if(!['shuffle','count','pick'].includes(name))ambient(false);
+  if(name==='home')refreshHome();
+  if(name==='count')setTopic(topic);
   window.scrollTo(0,0);
   const h=$('s-'+name).querySelector('h1,h2');
   if(h)h.focus({preventScroll:true});
@@ -511,11 +672,47 @@ function shuffleDeck(){
   for(let i=N-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]]}
   sel=[];
 }
+
+/* Niyet ritüeli: düğmeye basılı tut, halka dolunca kartlar karışır */
+const HOLD_MS=2600,RING=276.46;
+let hp=0,holding=false,raf=0,lastT=0,phase=0,stage=-1;
+const STAGES=['Elini düğmenin üstünde tut ve niyetini düşün.','Gözlerini kapat, sorunu aklından geçir.','Derin bir nefes al, kartlar seni dinliyor.','Az kaldı, bırakma.'];
+function setHold(p){
+  $('hring').style.strokeDashoffset=(RING*(1-p)).toFixed(1);
+  $('s-shuffle').style.setProperty('--p',p.toFixed(3));
+  const st=p<0.01?0:(p<0.35?1:(p<0.7?2:3));
+  if(st!==stage&&phase===0){stage=st;$('shuffle-msg').textContent=STAGES[st]}
+}
+function holdTick(ts){
+  if($('s-shuffle').hidden){holding=false;raf=0;return}
+  const dt=lastT?Math.min(ts-lastT,64):0;lastT=ts;
+  hp=Math.max(0,Math.min(1,hp+(holding?dt/HOLD_MS:-dt/(HOLD_MS*0.6))));
+  setHold(hp);
+  if(hp>=1){raf=0;finishHold();return}
+  if(holding||hp>0)raf=requestAnimationFrame(holdTick);else{raf=0;lastT=0}
+}
+function holdStart(e){
+  if(phase!==0||holding)return;
+  if(e&&e.cancelable)e.preventDefault();
+  holding=true;$('hold-t').textContent='Tutuyorsun…';sfx('tap');vibe(10);
+  if(!raf){lastT=0;raf=requestAnimationFrame(holdTick)}
+}
+function holdEnd(){if(!holding)return;holding=false;if(phase===0)$('hold-t').textContent='Basılı tut'}
+function finishHold(){
+  if(phase!==0)return;
+  phase=1;holding=false;hp=1;setHold(1);
+  shuffleDeck();sfx('chime');vibe([30,50,30]);
+  $('s-shuffle').classList.add('live');$('hold').disabled=true;$('hold-t').textContent='Karıştırılıyor';
+  $('shuffle-msg').textContent='Kartlar karıştırılıyor…';
+  tmr=setTimeout(()=>{$('shuffle-msg').textContent='Kartlar hazır.';tmr=setTimeout(()=>go('count'),reduce?300:700)},reduce?500:1800);
+}
 function startShuffle(){
-  shuffleDeck();
+  cancelAnimationFrame(raf);raf=0;hp=0;holding=false;phase=0;stage=-1;lastT=0;
   go('shuffle');
-  $('shuffle-msg').textContent='Gözlerini kapat ve niyetini aklından geçir.';
-  tmr=setTimeout(()=>{$('shuffle-msg').textContent='Kartlar hazır.';tmr=setTimeout(()=>go('count'),reduce?300:700)},reduce?900:2600);
+  $('s-shuffle').classList.remove('live');
+  $('hold').disabled=false;$('hold-t').textContent='Basılı tut';
+  setHold(0);
+  ambient(true);
 }
 function buildPick(){
   const g=$('pgrid');g.innerHTML='';
@@ -544,6 +741,7 @@ function toggle(pos){
   if(k>-1){sel.splice(k,1);$('pick-msg').textContent=''}
   else if(sel.length<want){sel.push(pos);$('pick-msg').textContent=''}
   else{$('pick-msg').textContent='En fazla '+want+' kart seçebilirsin. Birini bırakıp başkasını seç.'}
+  sfx('tap');vibe(8);
   updatePick();
 }
 function labels(n){
@@ -559,23 +757,28 @@ function reveal(){
   if(sel.length<want){$('pick-msg').textContent='Önce '+want+' kart seç. Şu an '+sel.length+' kart seçtin.';return}
   const revs=assignRev(want);
   drawn=sel.map((pos,i)=>({ci:deck[pos],rev:revs[i]}));
+  curEntry={id:Date.now(),t:Date.now(),topic,q:$('q').value.trim(),n:want,cards:drawn.map(d=>({ci:d.ci,rev:d.rev})),sum:null};
+  histSave(curEntry);
   buildResult();
   go('result');
 }
+function toneKey(d){const t=toneOf(d);return t>0?'good':(t<0?'bad':'warn')}
 function buildResult(){
   const q=$('q').value.trim();
-  $('r-q').textContent=q?('Sorun: '+q):(want+' kartlık açılım');
+  const tl=topic==='genel'?'':TOPICS[topic]+' · ';
+  $('r-q').textContent=q?('Sorun: '+q):(tl+want+' kartlık açılım');
   const L=labels(want),box=$('items');box.innerHTML='';
   $('summary').innerHTML='';
   sumParas=null;
   drawn.forEach((d,i)=>{
     const c=C[d.ci],it=document.createElement('div');
     it.className='item'+(d.rev?' rev':'');
+    const tnote=topic!=='genel'?'<p class="tnote"><b>'+TOPICS[topic]+':</b> '+esc(fill(TN[topic][toneKey(d)][(d.ci+i)%3],d))+'</p>':'';
     it.innerHTML='<div class="flip" role="button" tabindex="0" aria-label="'+L[i]+' kartını çevir"><div class="fi"><div class="ff back">'+BACK+'</div><div class="ff front">'+art(d.ci,d.rev)+'</div></div></div>'
       +'<div class="itxt"><span class="lbl">'+L[i]+'</span><p class="pre">Karta dokun ve çevir.</p>'
-      +'<div class="post" hidden><div class="name">'+c.n+(d.rev?'<span class="tag">Ters</span>':'')+'</div><div class="kw">'+(d.rev?c.rk:c.k)+'</div><p class="mean">'+(d.rev?c.rm:c.m)+'</p></div></div>';
+      +'<div class="post" hidden><div class="name">'+c.n+(d.rev?'<span class="tag">Ters</span>':'')+'</div><div class="kw">'+(d.rev?c.rk:c.k)+'</div><p class="mean">'+(d.rev?c.rm:c.m)+'</p>'+tnote+'</div></div>';
     const fl=it.querySelector('.flip');
-    const open=()=>{if(fl.classList.contains('open'))return;fl.classList.add('open');it.querySelector('.pre').hidden=true;it.querySelector('.post').hidden=false;fl.setAttribute('aria-label',c.n+(d.rev?' (ters)':''));checkAll()};
+    const open=()=>{if(fl.classList.contains('open'))return;fl.classList.add('open');sfx('flip');vibe(12);it.querySelector('.pre').hidden=true;it.querySelector('.post').hidden=false;fl.setAttribute('aria-label',c.n+(d.rev?' (ters)':''));checkAll()};
     fl.onclick=open;
     fl.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}};
     box.appendChild(it);
@@ -623,28 +826,60 @@ mixed:"Bu kart bir uyarı kadar bir öğüt de taşıyor. Bugün acele etme, kar
 heavy:"Bugün kendine karşı biraz nazik ol. Bu kart bir hüküm değil, dikkat et diyen bir fısıltı; ertelediğin küçük bir şeyi bugün halletmek içini rahatlatacak."
 };
 const TIMES=["Önümüzdeki on beş gün içinde","Bu ayın sonuna doğru","Ay dolunaya yaklaşırken","Bu hafta içinde","Önümüzdeki üç hafta içinde"];
+const TN={
+ask:{
+good:["Aşk konusunda \"{kw}\" senin lehine çalışıyor; kalbini açık tut, doğru kişi ya da doğru an kapıyı çalmaya yakın.","Gönül işlerinde \"{kw}\" enerjisi seni sarıyor. Bir bağ güçlenebilir ya da yeni bir tanışma sürpriz yapabilir; içinden geleni saklama.","Kalp tarafında hava aydınlık: \"{kw}\" sana iyi gelecek bir yakınlığa işaret ediyor, sadece acele etmeden akışa güven."],
+warn:["Aşk konusunda \"{kw}\" bir dikkat işareti taşıyor; duygularını söylemeden önce karşındakinin gerçekten ne istediğine kulak ver.","Gönül işlerinde \"{kw}\" seni düşünmeye çağırıyor; söylenmeyenler, söylenenlerden daha çok şey anlatıyor.","Kalbinle aklın arasında \"{kw}\" duruyor; bu hafta aceleyle verilmiş sözlerden uzak dur."],
+bad:["Aşk konusunda \"{kw}\" bir uyarı; bir kırgınlık ya da söylenmemiş bir şey araya girebilir. Önce kendi duygunu netleştir, sonra konuş.","Gönül tarafında \"{kw}\" gölge düşürüyor. Karşındakini suçlamadan önce kendi beklentine bak, belki sorun beklentide.","Kalp işlerinde ağır bir hava var: \"{kw}\". Bu bir son değil; mesafe koymak ve sakinleşmek seni toparlayacak."]},
+is:{
+good:["İş hayatında \"{kw}\" arkanda duruyor; emeğinin fark edildiği bir an yaklaşıyor, fırsatı görünce çekinme.","Kariyer tarafında \"{kw}\" kapıyı aralıyor. Yeni bir teklif, iş birliği ya da terfi söz konusu olabilir; hazır ol.","Çalışma alanında \"{kw}\" sana ivme kazandırıyor; planladığın işi bu dönem başlatmak için iyi bir zaman."],
+warn:["İşte \"{kw}\" bir dikkat işareti; imzalamadan, söz vermeden ya da istifa etmeden önce detayları bir kez daha oku.","Kariyerinde \"{kw}\" seni temkinli olmaya çağırıyor; çevrendekilerin niyetini acele etmeden tart.","Çalışma hayatında \"{kw}\" bir bekleme dönemine işaret ediyor; şimdi hazırlık yapmak, sonra hız kazanmak demek."],
+bad:["İş tarafında \"{kw}\" bir uyarı; bir gecikme, yanlış anlaşılma ya da yorgunluk işleri yavaşlatabilir. Önceliklerini sadeleştir.","Kariyerinde \"{kw}\" gölge düşürüyor. Büyük kararları ertele ve elindeki işi sağlamlaştır; fırtına geçince yolun açılır.","Çalışma hayatında \"{kw}\" tıkanıklık hissi veriyor; yardım istemek zayıflık değil, yolu kısaltır."]},
+para:{
+good:["Para konusunda \"{kw}\" olumlu çalışıyor; küçük ama düzenli bir kazanç ya da tasarruf imkânı belirebilir.","Maddi tarafta \"{kw}\" bereketi çağırıyor; biriktirdiklerin değer kazanabilir, sabırlı kalman yeterli.","Kesende \"{kw}\" ışığı var; beklediğin bir ödeme ya da fırsat yaklaşıyor, ama harcamayı akıllıca yönet."],
+warn:["Para konusunda \"{kw}\" dikkat istiyor; büyük harcama ve borç kararlarını bir gece beklet.","Maddi işlerde \"{kw}\" temkin söylüyor; \"kaçırırım\" korkusuyla verilen kararlar pahalıya patlar.","Cüzdan tarafında \"{kw}\" seni dengede kalmaya çağırıyor; gelirinle giderini yan yana yazmak iyi gelir."],
+bad:["Para konusunda \"{kw}\" bir uyarı; plansız harcama ya da beklenmedik gider olabilir. Önceliği zorunlu ihtiyaçlara ver.","Maddi tarafta \"{kw}\" gölge düşürüyor; riskli yatırımlardan ve ödünç verme işlerinden bu dönem uzak dur.","Kesede sıkışma hissi var: \"{kw}\". Bütçeyi sadeleştir, küçük kaçakları kapat; bu dönem geçici."]}
+};
+const TOPSUM={
+ask:{bright:"Aşk ve ilişkiler cephesinde kartlar ılık konuşuyor: kalbin yumuşuyor ve ilgi görüyorsun.",mixed:"Aşk konusunda hem yakınlık hem tereddüt var; kalbinle aklını aynı masaya oturtman lazım.",heavy:"Gönül tarafında kartlar temkinli; kırgınlıkları büyütmeden konuşmak ve kendine şefkat göstermek bu dönemin ilacı."},
+is:{bright:"İş ve kariyerde rüzgâr arkandan esiyor; emeğinin karşılığını görme zamanı yaklaşıyor.",mixed:"İş hayatında bazı kapılar aralanıyor, bazıları bekliyor; sabırla hamleyi dengelemelisin.",heavy:"Çalışma hayatında yorucu bir dönem görünüyor; büyük kararları ertelemek ve işi sadeleştirmek seni korur."},
+para:{bright:"Maddi konularda kartlar bereketli; küçük ama sağlam bir kazanç belirebilir.",mixed:"Para konusunda hem fırsat hem harcama uyarısı var; bütçeyi elinde tutan kazanır.",heavy:"Maddi tarafta temkin gerekiyor; riskli adımlardan kaçın, bu dönem biriktirmek ve sadeleşmek zamanı."}
+};
+const SHARELINE={
+bright:["Bir kapı aralanıyor, sezgine güven.","Rüzgâr arkandan esiyor, adımını at."],
+mixed:["Işık da gölge de yol gösteriyor.","Kartlar yönü gösterir, pusulayı tutan sensin."],
+heavy:["Gölge bir hüküm değil, bir uyarı.","Önce kendine nazik ol, yol yavaş yavaş açılır."]
+};
+const DAILY={
+good:["Bugün \"{kw}\" enerjisi seninle; karşına çıkan küçük bir fırsata ya da güzel bir habere açık ol.","Bugün \"{kw}\" senin tarafında. Sezgine güven, içinden gelen ilk adımı at."],
+warn:["Bugün \"{kw}\" bir dikkat işareti taşıyor; acele etme, söylemeden önce bir nefes al.","Bugün \"{kw}\" seni yavaşlamaya çağırıyor; kararlarını akşama bırakman iyi olur."],
+bad:["Bugün \"{kw}\" gölge düşürebilir; kendine nazik ol, ertelediğin küçük bir şeyi halletmek içini rahatlatır.","Bugün \"{kw}\" bir fısıltı gibi geliyor: yoruluyorsan dinlen, kırılganlığını saklama."]
+};
+function moodOf(list){const sc=list.reduce((a,d)=>a+toneOf(d),0)/list.length;return sc>=0.4?'bright':(sc<=-0.1?'heavy':'mixed')}
 function summaryParas(){
   if(sumParas)return sumParas;
-  const n=drawn.length,q=$('q').value.trim();
+  const n=drawn.length,q=$('q').value.trim(),nm=getName();
   const rev=drawn.filter(d=>d.rev).length,up=n-rev;
-  const score=drawn.reduce((s,d)=>s+toneOf(d),0)/n;
-  const mood=score>=0.4?'bright':(score<=-0.1?'heavy':'mixed');
+  const mood=moodOf(drawn);
   const time=pickOne(TIMES);
+  const hi=t=>nm?nm+', '+lf(t):t;
   const P=[];
   if(n===1){
     const d=drawn[0],c=C[d.ci];
-    P.push('Bugünün kartı '+c.n+'. '+(d.rev?(toneOf(d)>0?'Ters geldi ama bu kez ters yüzü sana iyi bir şey anlatıyor.':'Ters geldi, yani bugün kartın ışığından çok gölgesine kulak vermen gerekiyor.'):'Düz geldi, yani söylediğini olduğu gibi alabilirsin.'));
+    P.push(hi('Bugünün kartı '+c.n+'. '+(d.rev?(toneOf(d)>0?'Ters geldi ama bu kez ters yüzü sana iyi bir şey anlatıyor.':'Ters geldi, yani bugün kartın ışığından çok gölgesine kulak vermen gerekiyor.'):'Düz geldi, yani söylediğini olduğu gibi alabilirsin.')));
     P.push('Bu kartın bugün sana fısıldadığı kelime "'+kwOf(d)+'". Gün içinde karşına çıkan küçük bir olay, bir cümle ya da bir rastlantı bu kelimeyi sana hatırlatacak; dikkat edersen göreceksin.');
+    if(topic!=='genel')P.push(TOPSUM[topic][mood]);
     P.push((q?'Sorduğun "'+q+'" konusunda bu kart şunu söylüyor: ':'')+CLOSE1[mood].split('{time}').join(time));
-    P.push('Kartlar tahmin etmez, işaret eder. Gerisi senin ellerinde.');
+    P.push((nm?nm+', k':'K')+'artlar tahmin etmez, işaret eder. Gerisi senin ellerinde.');
   }else{
     const T=n===3?T3:T5;
-    P.push('Masaya serdiğim '+n+' kartın '+up+' tanesi düz, '+rev+' tanesi ters geldi. '+pickOne(MOOD[mood]));
+    P.push(hi('Masaya serdiğim '+n+' kartın '+up+' tanesi düz, '+rev+' tanesi ters geldi. '+pickOne(MOOD[mood])));
+    if(topic!=='genel')P.push(TOPSUM[topic][mood]);
     drawn.forEach((d,i)=>{const useUp=!d.rev||toneOf(d)>0;P.push(fill(T[i][useUp?0:1],d))});
     const a=drawn[0],b=drawn[n-1];
     P.push('Hikâyenin başında '+C[a.ci].n+', sonunda '+C[b.ci].n+' duruyor; yani "'+kwOf(a)+'" hâlinden "'+kwOf(b)+'" hâline doğru yürüyorsun. Aradaki kartlar bu yolculuğun nasıl geçeceğini anlatıyor.');
     P.push((q?'Sorduğun "'+q+'" konusuna gelirsek: ':'')+CLOSE[mood].split('{time}').join(time));
-    P.push('Unutma, kartlar kaderi yazmaz, yönü gösterir. Pusulayı tutan sensin.');
+    P.push((nm?nm+', u':'U')+'nutma, kartlar kaderi yazmaz, yönü gösterir. Pusulayı tutan sensin.');
   }
   sumParas=P;return P;
 }
@@ -654,14 +889,18 @@ function showSummary(){
   const e=document.createElement('span');e.className='eyebrow';e.textContent='Kartların birleşimi';
   const h=document.createElement('h3');h.textContent='Falcı konuşuyor';
   w.appendChild(e);w.appendChild(h);
-  summaryParas().forEach((t,i)=>{const p=document.createElement('p');p.className='mean';p.textContent=t;p.style.animationDelay=(reduce?0:i*0.35)+'s';w.appendChild(p)});
+  const P=summaryParas();
+  if(curEntry&&!curEntry.sum){curEntry.sum=P;histSave(curEntry)}
+  P.forEach((t,i)=>{const p=document.createElement('p');p.className='mean';p.textContent=t;p.style.animationDelay=(reduce?0:i*0.35)+'s';w.appendChild(p)});
   box.appendChild(w);
-  if(!reduce)w.scrollIntoView({behavior:'smooth',block:'start'});
+  const dn=document.createElement('p');dn.className='muted';dn.style.cssText='font-size:13px;margin-top:8px';dn.textContent='Bu fal eğlence amaçlıdır; önemli kararlarını kartlara bırakma.';box.appendChild(dn);
+  sfx('chime');vibe([20,40,20]);
+  if(!reduce&&!quiet)w.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function copyText(){
-  const q=$('q').value.trim(),L=labels(drawn.length);
-  let t='Orman Falcısı\n'+(q?'Sorum: '+q+'\n':'')+'\n';
-  drawn.forEach((d,i)=>{const c=C[d.ci];t+=L[i]+': '+c.n+(d.rev?' (ters)':'')+' - '+(d.rev?c.rk:c.k)+'\n'+(d.rev?c.rm:c.m)+'\n\n'});
+  const q=$('q').value.trim(),L=labels(drawn.length),nm=getName();
+  let t='Orman Falcısı\n'+(nm?'Fal: '+nm+'\n':'')+(topic!=='genel'?'Konu: '+TOPICS[topic]+'\n':'')+(q?'Sorum: '+q+'\n':'')+'\n';
+  drawn.forEach((d,i)=>{const c=C[d.ci];t+=L[i]+': '+c.n+(d.rev?' (ters)':'')+' - '+(d.rev?c.rk:c.k)+'\n'+(d.rev?c.rm:c.m)+'\n'+(topic!=='genel'?TOPICS[topic]+': '+fill(TN[topic][toneKey(d)][(d.ci+i)%3],d)+'\n':'')+'\n'});
   t+='Kartların birleşimi\n\n'+summaryParas().join('\n\n');
   return t;
 }
@@ -670,6 +909,138 @@ function doCopy(){
   const t=copyText();
   const fb=()=>{const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}document.body.removeChild(ta);toast(ok?'Fal kopyalandı':'Kopyalanamadı, metni elle seç')};
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(()=>toast('Fal kopyalandı'),fb)}else fb();
+}
+
+/* Paylaşım görseli */
+let shBlob=null,shUrl=null;
+function rr(x,a,b,w,h,r){x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath()}
+function wrapText(x,text,cx,y,maxW,lh){const words=text.split(' ');let line='',yy=y;for(const w of words){const t=line?line+' '+w:w;if(x.measureText(t).width>maxW&&line){x.fillText(line,cx,yy);line=w;yy+=lh}else line=t}if(line)x.fillText(line,cx,yy);return yy}
+function loadImg(src){return new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=src})}
+function svgSrc(i){const sv=art(i,false).replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" width="240" height="360" ');return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(sv)}
+async function makeShare(cards,topLabel,line,L){
+  const W=1080,H=1350,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
+  try{await Promise.race([Promise.all([document.fonts.load('600 70px "Cormorant Garamond"'),document.fonts.load('italic 500 40px "Cormorant Garamond"'),document.fonts.load('700 28px Mulish')]),new Promise(r=>setTimeout(r,1500))])}catch(e){}
+  const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#1a1040');g.addColorStop(1,'#0e0a1e');x.fillStyle=g;x.fillRect(0,0,W,H);
+  const gl=x.createRadialGradient(W/2,0,0,W/2,0,720);gl.addColorStop(0,'rgba(143,104,216,.45)');gl.addColorStop(1,'rgba(143,104,216,0)');x.fillStyle=gl;x.fillRect(0,0,W,H);
+  const r=rnd(7);x.fillStyle='#c9a7ff';for(let i=0;i<70;i++){x.globalAlpha=.25+r()*.5;x.beginPath();x.arc(r()*W,r()*H,r()*2.2+.6,0,6.3);x.fill()}x.globalAlpha=1;
+  const nm=getName(),serif='"Cormorant Garamond",Georgia,"Times New Roman",serif',sans='Mulish,system-ui,sans-serif';
+  x.textAlign='center';x.textBaseline='alphabetic';
+  x.fillStyle='#d8b86a';x.font='600 92px '+serif;x.fillText('Orman Falcısı',W/2,150);
+  x.fillStyle='#a99cc8';x.font='700 28px '+sans;
+  x.fillText((topLabel+(nm?' · '+nm:'')+' · '+new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long'})).toLocaleUpperCase('tr-TR'),W/2,205);
+  const n=cards.length,cw=n===1?380:(n===3?290:184),ch=cw*1.5,gap=n===1?0:(n===3?40:18);
+  const x0=(W-(n*cw+(n-1)*gap))/2,y0=n===1?270:(n===3?330:380);
+  for(let i=0;i<n;i++){
+    const cx=x0+i*(cw+gap),im=await loadImg(svgSrc(cards[i].ci));
+    x.save();x.beginPath();rr(x,cx,y0,cw,ch,16);x.clip();
+    if(cards[i].rev){x.translate(cx+cw/2,y0+ch/2);x.rotate(Math.PI);x.drawImage(im,-cw/2,-ch/2,cw,ch)}else x.drawImage(im,cx,y0,cw,ch);
+    x.restore();
+    x.strokeStyle='#d8b86a';x.lineWidth=2;x.beginPath();rr(x,cx,y0,cw,ch,16);x.stroke();
+    x.fillStyle='#a99cc8';x.font='700 '+(n===5?17:21)+'px '+sans;
+    wrapText(x,(L[i]||'').toLocaleUpperCase('tr-TR'),cx+cw/2,y0+ch+44,cw+gap-8,24);
+    x.fillStyle=cards[i].rev?'#ff8aa6':'#f2eafc';x.font='600 '+(n===5?26:(n===3?34:42))+'px '+serif;
+    wrapText(x,C[cards[i].ci].n+(cards[i].rev?' (ters)':''),cx+cw/2,y0+ch+(n===5?100:94),cw+gap-8,n===5?28:38);
+  }
+  x.fillStyle='#f2eafc';x.font='italic 500 50px '+serif;
+  wrapText(x,'“'+line+'”',W/2,1030,860,66);
+  x.fillStyle='#a99cc8';x.font='700 24px '+sans;
+  x.fillText('Orman Falcısı'+(/^https?:/.test(location.protocol)?' · '+location.host+location.pathname.replace(/\/$/,''):''),W/2,1290);
+  return new Promise(res=>cv.toBlob(res,'image/png'));
+}
+async function shareReading(cards,topLabel,line,L){
+  toast('Görsel hazırlanıyor…');
+  try{const b=await makeShare(cards,topLabel,line,L);if(!b)throw new Error('boş');showShare(b)}catch(e){toast('Görsel hazırlanamadı')}
+}
+function showShare(b){
+  shBlob=b;if(shUrl)URL.revokeObjectURL(shUrl);shUrl=URL.createObjectURL(b);
+  $('shm-img').src=shUrl;$('shm').hidden=false;$('shm-x').focus();
+}
+function closeShare(){$('shm').hidden=true}
+function shareResult(){
+  const fls=[...document.querySelectorAll('#items .flip')];
+  if(!fls.length||!fls.every(x=>x.classList.contains('open'))){toast('Önce kartları aç');return}
+  const mood=moodOf(drawn),lines=SHARELINE[mood];
+  const top=curEntry&&curEntry.kind==='daily'?'Günün kartı':(topic==='genel'?drawn.length+' kartlık fal':TOPICS[topic]+' falı');
+  shareReading(drawn,top,lines[drawn[0].ci%lines.length],labels(drawn.length));
+}
+
+/* Günün kartı: her gün cihaza özel tek kart */
+function hash32(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function mb32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function dailyCard(){
+  const k=todayKey();let st=sget('of_daily',null);
+  if(st&&st.d===k)return st;
+  let dev=sget('of_dev',null);if(!dev){dev=Math.random().toString(36).slice(2,10);sset('of_dev',dev)}
+  const r=mb32(hash32(dev+'|'+k));
+  st={d:k,ci:Math.floor(r()*N),rev:r()<0.35,seen:false};
+  sset('of_daily',st);return st;
+}
+function dailyLine(d,plain){
+  const t=toneKey(d),arr=DAILY[t],nm=getName();
+  const ln=fill(arr[d.ci%arr.length],d);
+  return(nm&&!plain)?nm+', '+lf(ln):ln;
+}
+function untilMidnight(){
+  const n=new Date(),m=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1);
+  const mins=Math.max(1,Math.round((m-n)/60000));
+  return Math.floor(mins/60)+' saat '+(mins%60)+' dk';
+}
+let dly=null;
+function buildDaily(){
+  dly=dailyCard();
+  const c=C[dly.ci];
+  $('dy-date').textContent=new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'});
+  $('dy-card').innerHTML='<div class="flip big'+(dly.seen?' open':'')+'" role="button" tabindex="0" id="dy-flip" aria-label="Bugünün kartını çevir"><div class="fi"><div class="ff back">'+BACK+'</div><div class="ff front">'+art(dly.ci,dly.rev)+'</div></div></div>';
+  $('dy-pre').hidden=dly.seen;$('dy-post').hidden=!dly.seen;$('dy-act').hidden=!dly.seen;
+  const showText=()=>{
+    const d={ci:dly.ci,rev:dly.rev};
+    const pb=$('dy-post');pb.className='itxt'+(dly.rev?' rev':'');
+    pb.innerHTML='<div class="name">'+c.n+(dly.rev?'<span class="tag">Ters</span>':'')+'</div><div class="kw">'+(dly.rev?c.rk:c.k)+'</div><p class="mean">'+(dly.rev?c.rm:c.m)+'</p><p class="mean" style="font-size:18px;color:var(--gold)">'+esc(dailyLine(d))+'</p><p class="muted" style="font-size:14px">Her gün tek kart çekilir. Yeni kart için '+untilMidnight()+' var.</p>';
+    $('dy-pre').hidden=true;pb.hidden=false;$('dy-act').hidden=false;
+  };
+  if(dly.seen)showText();
+  const fl=$('dy-flip');
+  const open=()=>{
+    if(fl.classList.contains('open'))return;
+    fl.classList.add('open');sfx('flip');vibe(12);
+    dly.seen=true;sset('of_daily',dly);
+    showText();
+    const d={ci:dly.ci,rev:dly.rev},ln=dailyLine(d);
+    curEntry={id:Date.now(),t:Date.now(),topic:'genel',q:'',n:1,kind:'daily',cards:[{ci:d.ci,rev:d.rev}],sum:[(getName()?getName()+', b':'B')+'ugünün kartı '+c.n+(d.rev?' (ters)':'')+'.',ln,'Kartlar tahmin etmez, işaret eder. Gerisi senin ellerinde.']};
+    histSave(curEntry);
+    sfx('chime');
+  };
+  fl.onclick=open;
+  fl.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}};
+}
+function shareDaily(){
+  const d={ci:dly.ci,rev:dly.rev};
+  shareReading([d],'Günün kartı',dailyLine(d,true),['Günün mesajı']);
+}
+
+/* Geçmiş */
+function buildHist(){
+  const h=histAll(),box=$('hlist');box.innerHTML='';
+  $('h-empty').hidden=h.length>0;$('h-clear').hidden=!h.length;
+  h.forEach(e=>{
+    const b=document.createElement('button');b.type='button';b.className='hitem';
+    const dt=new Date(e.t);
+    const lab=e.kind==='daily'?'Günün kartı':(TOPICS[e.topic]||'Genel')+' · '+e.n+' kart';
+    b.innerHTML='<div class="hmeta"><span>'+dt.toLocaleDateString('tr-TR',{day:'numeric',month:'long'})+' · '+dt.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})+'</span><span>'+lab+'</span></div>'
+      +'<div class="hmini">'+e.cards.map(c=>'<div>'+art(c.ci,c.rev)+'</div>').join('')+'</div>'
+      +'<div class="hnames">'+e.cards.map(c=>esc(C[c.ci].n)+(c.rev?' (ters)':'')).join(' · ')+'</div>'
+      +(e.q?'<div class="muted" style="font-size:14px">Sorun: '+esc(e.q)+'</div>':'');
+    b.onclick=()=>openHist(e.id);
+    box.appendChild(b);
+  });
+}
+function openHist(id){
+  const e=histAll().find(x=>x.id===id);if(!e)return;
+  curEntry=e;drawn=e.cards.map(c=>({ci:c.ci,rev:c.rev}));want=drawn.length;topic=e.topic||'genel';
+  $('q').value=e.q||'';
+  buildResult();sumParas=e.sum||null;
+  go('result');
+  quiet=true;document.querySelectorAll('#items .flip').forEach(fl=>fl.click());quiet=false;
 }
 
 function buildLib(){
@@ -695,22 +1066,56 @@ function renderDetail(){
 
 $('b-start').onclick=startShuffle;
 $('b-guide').onclick=()=>{buildLib();go('lib')};
+$('b-daily').onclick=()=>{buildDaily();go('daily');sfx('tap')};
+$('dy-share').onclick=shareDaily;
+$('dy-fal').onclick=startShuffle;
 $('n-fal').onclick=()=>go('home');
 $('n-lib').onclick=()=>{buildLib();go('lib')};
-document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{want=+b.dataset.n;sel=[];buildPick();go('pick')});
+$('n-hist').onclick=()=>{buildHist();go('hist')};
+$('h-clear').onclick=()=>{
+  const b=$('h-clear');
+  if(b.dataset.arm){sset('of_hist',[]);delete b.dataset.arm;b.textContent='Geçmişi temizle';buildHist();toast('Geçmiş temizlendi')}
+  else{b.dataset.arm='1';b.textContent='Emin misin? Tekrar dokun';setTimeout(()=>{delete b.dataset.arm;b.textContent='Geçmişi temizle'},3000)}
+};
+document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{want=+b.dataset.n;sel=[];buildPick();go('pick');sfx('tap')});
+document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{setTopic(c.dataset.t);sfx('tap')});
 $('b-reveal').onclick=reveal;
 $('b-clear').onclick=()=>{sel=[];$('pick-msg').textContent='';updatePick()};
-$('b-reshuffle').onclick=startShuffle;
+$('b-reshuffle').onclick=()=>{shuffleDeck();buildPick();sfx('flip');toast('Kartlar yeniden karıştırıldı')};
 $('b-all').onclick=openAll;
 $('b-copy').onclick=doCopy;
+$('b-share').onclick=shareResult;
 $('b-again').onclick=startShuffle;
 $('b-back').onclick=()=>go('lib');
 $('d-up').onclick=()=>{dRev=false;renderDetail()};
 $('d-rev').onclick=()=>{dRev=true;renderDetail()};
 $('d-prev').onclick=()=>{dIdx=(dIdx-1+N)%N;renderDetail();window.scrollTo(0,0)};
 $('d-next').onclick=()=>{dIdx=(dIdx+1)%N;renderDetail();window.scrollTo(0,0)};
+$('b-snd').onclick=()=>{snd=!snd;sset('of_snd',snd);paintSnd();if(!snd)ambient(false);else{sfx('tap');if(!$('s-shuffle').hidden||!$('s-count').hidden||!$('s-pick').hidden)ambient(true)}};
+$('nm').addEventListener('input',()=>sset('of_name',getName()));
+$('shm-x').onclick=closeShare;
+$('shm').addEventListener('click',e=>{if(e.target===$('shm'))closeShare()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('shm').hidden)closeShare()});
+$('shm-dl').onclick=()=>{if(!shUrl)return;const a=document.createElement('a');a.href=shUrl;a.download='orman-falcisi.png';document.body.appendChild(a);a.click();document.body.removeChild(a)};
+$('shm-share').onclick=async()=>{
+  if(!shBlob)return;
+  try{
+    const file=new File([shBlob],'orman-falcisi.png',{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]}))await navigator.share({files:[file],title:'Orman Falcısı',text:'Benim falım'});
+    else toast('Bu tarayıcıda doğrudan paylaşım yok, İndir ile kaydet');
+  }catch(e){}
+};
+const hd=$('hold');
+hd.addEventListener('pointerdown',holdStart);
+['pointerup','pointerleave','pointercancel'].forEach(t=>hd.addEventListener(t,holdEnd));
+hd.addEventListener('contextmenu',e=>e.preventDefault());
+hd.addEventListener('keydown',e=>{if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();holdStart()}});
+hd.addEventListener('keyup',e=>{if(e.key===' '||e.key==='Enter')holdEnd()});
+$('b-skip').onclick=()=>{if(phase===0)finishHold()};
 document.querySelectorAll('.fan .c').forEach(e=>e.innerHTML=BACK);
 document.querySelectorAll('.stack .c').forEach(e=>e.innerHTML=BACK);
+$('nm').value=sget('of_name','');
+paintSnd();refreshHome();
 </script>
 
 </body>
