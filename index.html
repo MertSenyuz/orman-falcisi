@@ -94,7 +94,7 @@ svg{display:block}
   padding:14px 16px;color:var(--fg);cursor:pointer;display:flex;align-items:center;gap:16px;font-family:var(--font-body)
 }
 .opt:hover{border-color:var(--gold)}
-.opt .n{font-family:var(--font-display);font-size:44px;line-height:1;color:var(--gold);min-width:34px;text-align:center}
+.opt .n{font-family:var(--font-display);font-size:44px;line-height:1;color:var(--gold);min-width:48px;text-align:center}
 .opt b{display:block;font-size:16px}
 .opt span{display:block;font-size:14px;color:var(--muted)}
 label,.lab{font-size:14px;color:var(--muted);display:block;margin-bottom:6px}
@@ -256,7 +256,7 @@ nav button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
   <section class="scr" id="s-count" hidden>
     <div>
       <span class="eyebrow">Kartlar hazır</span>
-      <h2 tabindex="-1" style="margin-top:6px">Kaç kart çekeceksin?</h2>
+      <h2 tabindex="-1" style="margin-top:6px">Hangi açılımı istersin?</h2>
     </div>
     <div>
       <div class="lab" id="tp-l">Neyi öğrenmek istiyorsun?</div>
@@ -271,11 +271,7 @@ nav button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
       <label for="q">Aklındaki soru (isteğe bağlı)</label>
       <input type="text" id="q" maxlength="120" placeholder="Bu yıl işlerim nasıl gidecek?" autocomplete="off">
     </div>
-    <div class="opts">
-      <button class="opt" data-n="1"><span class="n">1</span><div><b>Günün mesajı</b><span>Tek kart, kısa ve net bir cevap.</span></div></button>
-      <button class="opt" data-n="3"><span class="n">3</span><div><b>Geçmiş, şimdi, gelecek</b><span>Bir konunun üç zamanı.</span></div></button>
-      <button class="opt" data-n="5"><span class="n">5</span><div><b>Derin açılım</b><span>Ruh halin, engel, destek, tavsiye ve sonuç.</span></div></button>
-    </div>
+    <div class="opts" id="opts"></div>
   </section>
 
   <section class="scr" id="s-pick" hidden>
@@ -580,7 +576,7 @@ const BACK='<svg viewBox="0 0 120 180" aria-hidden="true">'+sky(20,'#120a26','#2
 
 const $=id=>document.getElementById(id);
 const screens=['home','shuffle','count','pick','result','lib','detail','daily','hist'];
-let deck=[],want=3,sel=[],drawn=[],tmr=null,libBuilt=false,dIdx=0,dRev=false,topic='genel',curEntry=null,quiet=false;
+let spread='g3',deck=[],want=3,sel=[],drawn=[],tmr=null,libBuilt=false,dIdx=0,dRev=false,topic='genel',curEntry=null,quiet=false;
 const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const TOPICS={genel:'Genel',ask:'Aşk',is:'İş',para:'Para'};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -634,7 +630,7 @@ function refreshHome(){
   const st=sget('of_daily',null),seen=st&&st.d===todayKey()&&st.seen;
   $('b-daily').textContent=seen?'Bugünün kartına tekrar bak':'Bugünün kartını aç';
   const h=histAll()[0];
-  $('last').textContent=h?('Son falın: '+new Date(h.t).toLocaleDateString('tr-TR',{day:'numeric',month:'long'})+' · '+(h.kind==='daily'?'Günün kartı':(TOPICS[h.topic]||'Genel')+', '+h.n+' kart')):'';
+  $('last').textContent=h?('Son falın: '+new Date(h.t).toLocaleDateString('tr-TR',{day:'numeric',month:'long'})+' · '+(h.kind==='daily'?'Günün kartı':(SPREADS[h.sp||({1:'g1',3:'g3',5:'g5'})[h.n]]||SPREADS.g3).t)):'';
 }
 
 function go(name){
@@ -728,10 +724,29 @@ function toggle(pos){
   sfx('tap');vibe(8);
   updatePick();
 }
-function labels(n){
-  if(n===1)return ['Günün mesajı'];
-  if(n===3)return ['Geçmişin','Şimdin','Geleceğin'];
-  return ['Ruh halin','Önündeki engel','Sana destek olan','Falcının tavsiyesi','Olası sonuç'];
+const SPREADS={
+g1:{n:1,t:'Günün mesajı',d:'Tek kart, kısa ve net bir cevap.',L:['Günün mesajı']},
+g3:{n:3,t:'Geçmiş, şimdi, gelecek',d:'Bir konunun üç zamanı.',L:['Geçmişin','Şimdin','Geleceğin']},
+iki:{n:3,t:'İki kişi arasında',d:'Sen, o ve aranızdaki bağ. Aşk için en uygunu.',L:['Sen','O','Aranızdaki bağ']},
+ay:{n:4,t:'Aylık açılım',d:'Önümüzdeki dört haftanın haritası.',L:['1. hafta','2. hafta','3. hafta','4. hafta']},
+g5:{n:5,t:'Derin açılım',d:'Ruh halin, engel, destek, tavsiye ve sonuç.',L:['Ruh halin','Önündeki engel','Sana destek olan','Falcının tavsiyesi','Olası sonuç']},
+hac:{n:5,t:'Haç açılımı',d:'Merkezde durumun özü, dört yönde geçmiş, gelecek, kök ve hedef.',L:['Durumun özü','Geride bıraktığın','Önüne çıkacak','Altta yatan neden','Üstündeki hedef']},
+yil:{n:12,t:'Yıllık açılım',d:'On iki kart, önümüzdeki on iki ayın her biri için.',L:[]}
+};
+const MONTHS=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+function spLabels(id,t){
+  if(id==='yil'){const m=new Date(t||Date.now()).getMonth();return Array.from({length:12},(_,i)=>MONTHS[(m+i)%12])}
+  return SPREADS[id].L;
+}
+function buildOpts(){
+  const box=$('opts');box.innerHTML='';
+  ['g1','g3','iki','ay','g5','hac','yil'].forEach(id=>{
+    const sp=SPREADS[id],b=document.createElement('button');
+    b.className='opt';b.type='button';
+    b.innerHTML='<span class="n">'+sp.n+'</span><div><b>'+sp.t+'</b><span>'+sp.d+'</span></div>';
+    b.onclick=()=>{spread=id;want=sp.n;if(id==='iki'&&topic==='genel')setTopic('ask');sel=[];buildPick();go('pick');sfx('tap')};
+    box.appendChild(b);
+  });
 }
 function assignRev(n){
   const r=Array.from({length:n},()=>Math.random()<0.35);
@@ -741,7 +756,7 @@ function reveal(){
   if(sel.length<want){$('pick-msg').textContent='Önce '+want+' kart seç. Şu an '+sel.length+' kart seçtin.';return}
   const revs=assignRev(want);
   drawn=sel.map((pos,i)=>({ci:deck[pos],rev:revs[i]}));
-  curEntry={id:Date.now(),t:Date.now(),topic,q:$('q').value.trim(),n:want,cards:drawn.map(d=>({ci:d.ci,rev:d.rev})),sum:null};
+  curEntry={id:Date.now(),t:Date.now(),topic,q:$('q').value.trim(),n:want,sp:spread,cards:drawn.map(d=>({ci:d.ci,rev:d.rev})),sum:null};
   histSave(curEntry);
   buildResult();
   go('result');
@@ -750,14 +765,14 @@ function toneKey(d){const t=toneOf(d);return t>0?'good':(t<0?'bad':'warn')}
 function buildResult(){
   const q=$('q').value.trim();
   const tl=topic==='genel'?'':TOPICS[topic]+' · ';
-  $('r-q').textContent=q?('Sorun: '+q):(tl+want+' kartlık açılım');
-  const L=labels(want),box=$('items');box.innerHTML='';
+  $('r-q').textContent=q?('Sorun: '+q):(tl+SPREADS[spread].t);
+  const L=spLabels(spread,curEntry?curEntry.t:Date.now()),box=$('items');box.innerHTML='';
   $('summary').innerHTML='';
   sumParas=null;
   drawn.forEach((d,i)=>{
     const c=C[d.ci],it=document.createElement('div');
     it.className='item'+(d.rev?' rev':'');
-    const tnote=topic!=='genel'?'<p class="tnote"><b>'+TOPICS[topic]+':</b> '+esc(fill(TN[topic][toneKey(d)][(d.ci+i)%3],d))+'</p>':'';
+    const tnote=topic!=='genel'?'<p class="tnote"><b>'+TOPICS[topic]+':</b> '+esc(TC[topic][d.ci][d.rev?1:0])+'</p>':'';
     it.innerHTML='<div class="flip" role="button" tabindex="0" aria-label="'+L[i]+' kartını çevir"><div class="fi"><div class="ff back">'+BACK+'</div><div class="ff front">'+art(d.ci,d.rev)+'</div></div></div>'
       +'<div class="itxt"><span class="lbl">'+L[i]+'</span><p class="pre">Karta dokun ve çevir.</p>'
       +'<div class="post" hidden><div class="name">'+c.n+(d.rev?'<span class="tag">Ters</span>':'')+'</div><div class="kw">'+(d.rev?c.rk:c.k)+'</div><p class="mean">'+(d.rev?c.rm:c.m)+'</p>'+tnote+'</div></div>';
@@ -810,19 +825,151 @@ mixed:"Bu kart bir uyarı kadar bir öğüt de taşıyor. Bugün acele etme, kar
 heavy:"Bugün kendine karşı biraz nazik ol. Bu kart bir hüküm değil, dikkat et diyen bir fısıltı; ertelediğin küçük bir şeyi bugün halletmek içini rahatlatacak."
 };
 const TIMES=["Önümüzdeki on beş gün içinde","Bu ayın sonuna doğru","Ay dolunaya yaklaşırken","Bu hafta içinde","Önümüzdeki üç hafta içinde"];
-const TN={
-ask:{
-good:["Aşk konusunda \"{kw}\" senin lehine çalışıyor; kalbini açık tut, doğru kişi ya da doğru an kapıyı çalmaya yakın.","Gönül işlerinde \"{kw}\" enerjisi seni sarıyor. Bir bağ güçlenebilir ya da yeni bir tanışma sürpriz yapabilir; içinden geleni saklama.","Kalp tarafında hava aydınlık: \"{kw}\" sana iyi gelecek bir yakınlığa işaret ediyor, sadece acele etmeden akışa güven."],
-warn:["Aşk konusunda \"{kw}\" bir dikkat işareti taşıyor; duygularını söylemeden önce karşındakinin gerçekten ne istediğine kulak ver.","Gönül işlerinde \"{kw}\" seni düşünmeye çağırıyor; söylenmeyenler, söylenenlerden daha çok şey anlatıyor.","Kalbinle aklın arasında \"{kw}\" duruyor; bu hafta aceleyle verilmiş sözlerden uzak dur."],
-bad:["Aşk konusunda \"{kw}\" bir uyarı; bir kırgınlık ya da söylenmemiş bir şey araya girebilir. Önce kendi duygunu netleştir, sonra konuş.","Gönül tarafında \"{kw}\" gölge düşürüyor. Karşındakini suçlamadan önce kendi beklentine bak, belki sorun beklentide.","Kalp işlerinde ağır bir hava var: \"{kw}\". Bu bir son değil; mesafe koymak ve sakinleşmek seni toparlayacak."]},
-is:{
-good:["İş hayatında \"{kw}\" arkanda duruyor; emeğinin fark edildiği bir an yaklaşıyor, fırsatı görünce çekinme.","Kariyer tarafında \"{kw}\" kapıyı aralıyor. Yeni bir teklif, iş birliği ya da terfi söz konusu olabilir; hazır ol.","Çalışma alanında \"{kw}\" sana ivme kazandırıyor; planladığın işi bu dönem başlatmak için iyi bir zaman."],
-warn:["İşte \"{kw}\" bir dikkat işareti; imzalamadan, söz vermeden ya da istifa etmeden önce detayları bir kez daha oku.","Kariyerinde \"{kw}\" seni temkinli olmaya çağırıyor; çevrendekilerin niyetini acele etmeden tart.","Çalışma hayatında \"{kw}\" bir bekleme dönemine işaret ediyor; şimdi hazırlık yapmak, sonra hız kazanmak demek."],
-bad:["İş tarafında \"{kw}\" bir uyarı; bir gecikme, yanlış anlaşılma ya da yorgunluk işleri yavaşlatabilir. Önceliklerini sadeleştir.","Kariyerinde \"{kw}\" gölge düşürüyor. Büyük kararları ertele ve elindeki işi sağlamlaştır; fırtına geçince yolun açılır.","Çalışma hayatında \"{kw}\" tıkanıklık hissi veriyor; yardım istemek zayıflık değil, yolu kısaltır."]},
-para:{
-good:["Para konusunda \"{kw}\" olumlu çalışıyor; küçük ama düzenli bir kazanç ya da tasarruf imkânı belirebilir.","Maddi tarafta \"{kw}\" bereketi çağırıyor; biriktirdiklerin değer kazanabilir, sabırlı kalman yeterli.","Kesende \"{kw}\" ışığı var; beklediğin bir ödeme ya da fırsat yaklaşıyor, ama harcamayı akıllıca yönet."],
-warn:["Para konusunda \"{kw}\" dikkat istiyor; büyük harcama ve borç kararlarını bir gece beklet.","Maddi işlerde \"{kw}\" temkin söylüyor; \"kaçırırım\" korkusuyla verilen kararlar pahalıya patlar.","Cüzdan tarafında \"{kw}\" seni dengede kalmaya çağırıyor; gelirinle giderini yan yana yazmak iyi gelir."],
-bad:["Para konusunda \"{kw}\" bir uyarı; plansız harcama ya da beklenmedik gider olabilir. Önceliği zorunlu ihtiyaçlara ver.","Maddi tarafta \"{kw}\" gölge düşürüyor; riskli yatırımlardan ve ödünç verme işlerinden bu dönem uzak dur.","Kesede sıkışma hissi var: \"{kw}\". Bütçeyi sadeleştir, küçük kaçakları kapat; bu dönem geçici."]}
+const TC={
+ask:[
+["Aşkta bir dönüşüm yaşıyorsun: eski kabuğunu bırakıp kalbini yeni bir biçimde açıyorsun. İlişkindeyse bir değişim, yalnızsan yeni bir sen karşına çıkıyor.","Aşkta eski alışkanlıklara ve eski bir hikâyeye tutunuyorsun. Kalbin değişmek istiyor ama korku frene basıyor; bırakmadan yeni bir şey gelmeyecek."],
+["Gönül işlerinde yolunu gösteren bir ışık var: sezgin ya da güvendiğin biri doğru kişiyi ve doğru anı fısıldıyor. Kalbinin fenerine güven.","Aşkta ne istediğini bulandırmışsın; herkesin tavsiyesi araya girmiş. Karar vermeden önce kendi sesini duyabileceğin sessiz bir an ver kendine."],
+["Bir bağ güçleniyor. Köklü, güven veren bir yakınlık kuruluyor ya da mevcut ilişkin derinleşiyor. Birbirinizi gerçekten duyabilirsiniz.","İlişkide bir kopukluk var: söylenmemiş sözler araya mesafe koymuş. Köprüyü onarmak istiyorsan ilk adımı dürüst bir konuşma olarak at."],
+["Kalbine küçük ama inatçı bir umut düşüyor. Beklediğin mesaj, bakış ya da yakınlık için karanlık sanıldığı kadar uzun değil.","Aşkta umudunu yitirmeye yakınsın ve yorgunluk her şeyi karartıyor. Bir kez daha denemek için önce kendini dinlendirmelisin."],
+["Aşkta bir eşikte duruyorsun: yeni bir ilişki, bir yakınlaşma ya da bir karar kapıda. Sis dağılınca nereye gireceğini göreceksin.","Gönül kapısı şu an kapalı gibi: ya karşındaki ya da sen mesafedesin. Zorlamak yerine kapının kendi vaktinde açılmasını bekle."],
+["Kalbin iyileşiyor. Eski bir yara kapanıyor ya da ilişkinde şefkatli bir barışma var. Kendine ve ona nazik olmak şifa getiriyor.","Aşkta veren taraf olmaktan yorulmuşsun. Önce kendi kuyunu doldur; boşalan bir kalple kimseye sevgi taşıyamazsın."],
+["İçgüdün aşkta doğruyu söylüyor. Birinin niyetini ya da kendi hislerini sezmişsin; o ilk his seni yanıltmıyor.","İlişkide görmek istemediğin bir şey var. Kör noktan, sevdiğin kişinin bir yönü ya da kendi beklentin olabilir; gözünü kaçırma."],
+["Henüz küçük ama büyümeye hazır bir sevgi tohumu var. Yeni bir tanışma ya da yeni filizlenen bir yakınlık, ilgi görürse güzel çiçek açar.","Bir ilişkinin tohumu var ama sen ya da o su vermiyor. Çekingenlik ya da ilgisizlik yüzünden bu güzel ihtimal filizlenmeden kalabilir."],
+["Aşkta sınırların sağlıklı: nerede durup nerede açılacağını biliyorsun. Seni yoran yakınlıklara hayır demek kalbini korur.","Kalbinin etrafına çok yüksek bir çit örmüşsün ya da karşındaki öyle yapmış. Güvenmeden yakınlık olmaz, duvarın bir yerinden kapı açman gerek."],
+["Aşkta bir arınma yaşıyorsun: ağlamak, konuşmak, eski bir yükü bırakmak. Yağmurdan sonra kalbin hafifleyecek.","Aşkta söylemediğin ve içine attığın bir duygu var. Bastırdıkça büyüyor; güvendiğin birine ya da kendine itiraf etmenin vakti geldi."],
+["Kalbinin gerçek isteğiyle yüz yüze geliyorsun. Aşkta kimi ya da neyi aradığın netleşiyor; bu bilgi yeni bir yol açar.","Aşkta kendi gerçeğinden kaçıyorsun; belki hislerinden, belki bir karardan. Bakmamak sorunu küçültmez, mağaranın içine kısa bir ışık tut."],
+["Aşkta yeni bir sayfa açılıyor. Yalnızsan taze bir tanışma, ilişkideysen ikinizin de yenilendiği bir dönem yaklaşıyor.","Aşk biraz geç açıyor ama açacak. Beklediğin yakınlık ya da cevap için acele etme; çiçek zorlanınca değil, vaktinde açılır."],
+["Aşkta parlıyorsun ve fark ediliyorsun. Cesaretle atacağın adım karşılık bulur; bu dönem sevilmeyi hak ettiğini hatırla.","Aşkta gurur ve haklı çıkma isteği ilişkiyi zorluyor. Her tartışmayı kazanmak bağı kazanmak demek değildir; biraz yumuşa."],
+["Kalbinden geçen dilek kuyuya düştü ve karşılık bulma yolunda. Aşkta istediğini net düşün, sonra harekete geç.","Aşkta hep hayal kuruyor ama adım atmıyorsun. Dilek tek başına yetmez; hayalindeki kişiye ya da duruma gerçekten yaklaşman gerek."],
+["Aşkta sakin bir dönem: gürültüsüz, güven veren bir yakınlık ya da kalbin kendi huzurunu bulması. Acele edecek bir şey yok.","İlişkide ya da kalbinde durgunluk var; heyecan solmuş. Gölü dalgalandıracak küçük bir sürpriz ya da dürüst bir konuşma iyi gelir."],
+["Aşkta öğrenme zamanı: karşındakini tanıdıkça ya da kendi ihtiyaçlarını anladıkça doğru kararı vereceksin. Soru sormaktan çekinme.","Aşkla ilgili duyduğun bir şey eksik ya da yanlış olabilir. Dedikoduyla ya da varsayımla değil, doğrudan kendisinden dinleyerek karar ver."],
+["Aşkta bir tıkanıklık çözülüyor. Konuşmak, özür dilemek ya da küçük bir jest kilidi açar; anahtar senin elinde.","Aşkta kilit takılı: ne söylesen aynı yere çıkıyorsun. Çözümü karşındakinde değil, kendi esnekliğinde ara."],
+["Aşkta gördüğün her şey gerçek olmayabilir. İdealleştirdiğin bir yan ya da karşındakinin sunduğu bir imaj olabilir; bir süre izle.","Aşkta gerçek ortaya çıkıyor: perde kalkıyor ve kimin kim olduğu belli oluyor. Bu acı gelse de seni doğru yere götürür."],
+["Aşkta zekân ve cazibeni kullanıyorsun, bu seni öne çıkarır. Yine de kimin niyetinin ne olduğunu sorgulamayı bırakma.","Aşkta bir oyun ya da yarım doğru var. Birinin sana ya da senin birine tam dürüst olmadığın bir durum görünüyor; açık konuşmak herkesi özgürleştirir."],
+["Aşkta özgürlüğüne ihtiyaç duyuyorsun. Kendi sürünle ya da tek başına güçlüsün; seni kısıtlamadan seven biri sana iyi gelir.","Yalnızlık hissi kalbine çökmüş; mesafeni korurken kimsenin yaklaşamadığını fark ediyorsun. Kapıyı biraz aralamak sana iyi gelir."],
+["Aşkta onurlu ve sakin bir duruşun var. Kendine saygı duyduğunda doğru kişiler de sana aynı saygıyla yaklaşır.","Gurur aşkta engel oluyor: ilk adımı atmamak, özür dilememek. Sevgi bazen biraz gururdan vazgeçmeyi ister."],
+["Kalple ilgili bir haber yolda: bir mesaj, bir arama ya da bir davet. Beklediğin kişiden ya da hiç beklemediğinden gelebilir.","Kalbe dair hoşuna gitmeyecek bir haber ya da söylenti olabilir. Hemen tepki verme, önce gerçeğini öğren."],
+["Aşkta şans yanında: tesadüf bir buluşma ya da beklenmedik bir yakınlık çıkabilir. Sürprizlere açık ol.","Aşkta bir fırsat elinden kayıp gidiyor olabilir; çekimser kaldığın bir an vardı. Bir sonraki ışıkta tereddüt etme."],
+["Aşkta bir döngü tamamlanıyor: bir ilişki bitiyor ya da yeni bir tur başlıyor. Geçmişten ders alırsan döngü yükselen bir sarmala dönüşür.","Aşkta aynı kişiye, aynı kavgaya ya da aynı hataya dönüp duruyorsun. Döngüyü kıran şey, cesaretle farklı bir seçim yapmak."],
+["Aşkta sabır meyve veriyor. Yavaş ilerleyen bir yakınlık en sağlam olandır; acele etmeden yoluna devam et.","İlişkin ya da kalbin ilerlemiyor gibi geliyor. Beklemek bir noktada eylemsizliğe dönüşür; küçük bir adım at."],
+["Aşkta akışa kendini bırak. Zorlamadan, planlamadan gelen yakınlıklar bu dönem en güzel olanlar.","Aşkta akıntıya karşı yüzüyorsun: olmayacak bir şeyi zorluyor olabilirsin. Gevşeyip neyin kendiliğinden geldiğine bak."],
+["Aşkta verdiğin emek karşılığını görüyor. İlişkine ya da kendine yatırım yaptığın zaman, petek sevgiyle doluyor.","Aşkta sen veriyorsun, karşılığı gelmiyor gibi. Emek karşılıklı değilse ilişkiyi yeniden tartmanın zamanı."],
+["Aşkta zarif ve çekici bir dönem. Doğal hâlinle ilgi çekiyorsun; güzel bir yakınlık nazik bir tavırla gelir.","Aşkta gösteriş ve imaj bir perde olabilir; senin ya da onun. Süs yerine olduğun gibi görünmek gerçek bağı kurar."],
+["Aşkta barış var: bir kırgınlık sona eriyor, bir tartışma tatlıya bağlanıyor. Uzlaşma kalbini ferahlatacak.","İlişkide gerginlik yükseliyor; küçük şeyler büyüyor. Tartışmadan önce nefes alıp asıl derdini nazikçe söylemeyi dene."],
+["Aşkta içinden bir ses seni uyarıyor: bir şey ters olabilir ya da bir karar vaktidir. Bu çanı dinle, boşuna çalmıyor.","Aşkta uyarıları duymazdan geliyorsun. Çevrendekilerin ya da kendi iç sesinin söylediğini artık ciddiye alma zamanı."],
+["Aşkta kader devrede: seni bekleyen bir yol var ve doğru adımla karşılaşma gerçekleşecek. Çekilecek kılıç senin elinde.","Aşkta korkudan geri duruyorsun; kılıcı çekmeye cesaretin yok. Kaybetmekten korkmak kazanma ihtimalini de götürüyor."],
+["Aşkta güçlü ve olgun biri hayatına giriyor ya da sen bu role bürünüyorsun. Koruyan, sorumluluk alan bir sevgi var.","İlişkide kontrol ve baskı var; biri hükmediyor. Sevgi birinin sesini kısarak değil, onu duyarak büyür."],
+["Aşk kartının kendisi çıktı: kalbin derin bir bağa açık. Sevmek ve sevilmek için en verimli zamanlardan birindesin.","Kalp kırıklığı ya da kırılma korkusu var. Yara tazeyse acele etme; ağaç, mevsimini bekleyerek yeniden yeşerir."],
+["Aşk hayatında çark dönüyor: beklenmedik bir tanışma ya da ilişkide yeni bir dönem. Değişimi karşıla, kaçma.","Aşkta değişimi engellemeye çalışıyorsun ama çark dönüyor. Direnmek yerine neyin değişmesi gerektiğini kabul et."],
+["Aşkta hareket var: yeni yerler, yeni insanlar, taze bir mesaj. Kalbin hafifliyor ve yeni ihtimallere yelken açıyor.","Aşkta savruluyorsun; ne istediğini bilmeden bir yerden bir yere gidiyorsun. Bir an durup yönünü seçmen gerek."],
+["Aşkta ani bir sarsıntı olabilir: beklenmedik bir itiraf, bir ayrılık ya da bir gerçek. Yıkılan şey zaten sana yaramayan olandır.","Aşkta yaklaşan bir sarsıntıyı bastırıyorsun; konuşmak istemediğin bir mesele var. Kaçınmak yıkımı ertelemez, büyütür."],
+["Aşkta büyülü bir çekim var: tanıştığında zaman duruyor gibi. Bu güzel bir sihir, yeter ki gözün açık kalsın.","Aşkta gözünü bağlayan bir çekim ya da tuzak olabilir. Cazibenin gerçekten sevgi mi yoksa merak mı olduğuna dikkatle bak."],
+["Aşkta zamanlama her şey: şu an olgunlaşan bir şey var. Ne erken ne geç; bu dönem vereceğin kararlar yerinde.","Aşkta zaman daralıyor ya da bir şeyi geciktirdin. Söylemek istediğin söz, atmak istediğin adım için fazla bekleme."],
+["Aşkta bir yolculuğa çıkıyorsun: gerçek ya da mecazi. Yolda tanışmalar ve kalbinin yönünü bulmak seni bekliyor.","Aşkta kendini kaybolmuş hissediyorsun; yön ve hedef belirsiz. Kimsenin hizasına girmeden önce kendi haritanı çiz."],
+["Aşkta neşe ve oyun zamanı: flört, kahkaha, hafiflik. Kendini çok ciddiye alma; sevgi biraz da eğlencedir.","Aşkta sorumsuz bir davranış var: söz verip tutmamak ya da duygularla oynamak. Eğlence güzel ama biri kırılıyorsa dur."],
+["Aşkta bolluk: ilgi, şefkat ve paylaşım. Bir sandık dolusu sevgi seni bekliyor; vermeyi bilen alır.","Aşkta duygusal bir kıtlık hissediyorsun; ilgi yeterli gelmiyor. Çevrene bakıp sevgiyi başka kaynaklardan da çoğaltabilirsin."],
+["Aşkta bağlılık ve söz geliyor: bir teklif, bir karar ya da samimi bir adım. Verdiğin sözün arkasında dur.","Aşkta verilen ya da beklenen bir söz bozulabilir. Güveni onarmak istiyorsan sözleri küçük ama tutulabilir tut."],
+["Aşkta adım adım yükseliyorsun: ilişkin ya da kalbin bir üst seviyeye çıkıyor. Basamakları tek tek çık, acele edip düşme.","Aşkta yükselirken kayma korkusu seni tutuyor. Kendinden emin ol, basamak sağlam; yine de bir elin korkulukta dursun."],
+["Aşkta bir korku var: terk edilme, yalnız kalma ya da incinme korkusu. Bu korkuyu ismiyle çağırmak onu küçültür.","Aşkta korkunu aşıyorsun. Karanlıktan sana bakan şey sandığından küçükmüş; kalbini açmak için güçlüsün."],
+["Aşkta bereket akıyor: sevgi, ilgi ve paylaşım bol. Bu nehirden hem içiyor hem sevdiklerinle paylaşıyorsun.","Aşkta nehir kuruyor gibi: ilgi azalıyor, sevgi seyrekleşiyor. Kaynağı bulup yeniden akıtmak için ilk adımı sen at."],
+["Aşkta mutluluk kapıda: fırtınadan sonra güzel bir yakınlık, renkli bir dönem. Kalbin özlediği neşeyi bulacak.","Aşkta renkler solmuş; rutin ya da yorgunluk ilişkiyi grileştirmiş. Küçük bir sürprizle renkleri geri çağırabilirsin."]
+],
+is:[
+["İş hayatında bir dönüşüm var: rolün, işin ya da sektörün değişiyor. Kozadan çıkış zahmetli ama kanatların seni daha yükseğe taşıyacak.","İşte değişime direniyorsun; eski düzene tutunmak seni yerinde tutuyor. Yeni bir beceriye ya da role açılmadan ilerleme zor."],
+["Kariyerinde yol gösteren bir mentor, bir fikir ya da bir iç ses var. Hedefin net olmasa bile bir sonraki adımı görebileceksin.","İş konusunda yönünü kaybetmişsin; herkesin önerisi kafanı karıştırıyor. Dur, hedefini yaz ve seçimini ona göre yap."],
+["İşte güçlü bağlantılar kuruluyor: iş birliği, ekip uyumu ya da yeni bir çevre. Kökleri sağlam ilişkiler kariyerini taşır.","İş yerinde ya da bir ortaklıkta kopukluk var; iletişim aksıyor. Köprüyü sağlamlaştıracak açık bir konuşma gerekli."],
+["İşte küçük ama umut veren bir işaret var: bir yanıt, bir fırsat ya da bir teklif. Karanlık sandığın dönem yavaş yavaş aydınlanıyor.","İşte moralin düşük, umudun yıpranmış. Her şeyi tek seferde çözmeye çalışma; küçük bir işi bitirerek başla."],
+["Kariyerde bir eşikte duruyorsun: yeni bir iş, terfi ya da proje kapıda. Sis dağılınca doğru kapıyı göreceksin.","İş kapıları şu an kapalı gibi; yanıt gelmiyor ya da süreç tıkanıyor. Zorlamak yerine başka bir kapıyı da dene."],
+["İşte yorgunluk dinleniyor, enerjin yenileniyor. Mola, izin ya da düzenli bir rutin verimini artıracak.","İşte tükenmişliğe yaklaşıyorsun. Sınır koymadan, dinlenmeden devam etmek verimini düşürür; önce kendini toparla."],
+["İş konusunda sezgin güçlü: bir ortamın ya da bir kişinin durumunu önceden hissediyorsun. Bu hisse güven ama veriyle de destekle.","İşte gözden kaçırdığın bir detay var; kör nokta bir sözleşme, bir rakip ya da bir alışkanlık olabilir. Bir kez daha kontrol et."],
+["Kariyerinde filizlenmeye hazır bir fikir ya da yetenek var. Küçük başla, düzenli sula; bu tohum büyüyecek.","Güzel bir fikrin ya da yeteneğin var ama harekete geçmiyorsun. Başlamadan filizlenmez; bu hafta ilk adımı at."],
+["İşte sınırlarını koyuyorsun: hayır demek, mesaiyi korumak ve değerini bilmek. Bu çit seni tüketenlerden korur.","İş yerinde bir duvarla karşılaşıyorsun ya da kendin örmüşsün. Esneklik ve iş birliği bu duvarı bir kapıya çevirir."],
+["İşte bir arınma dönemi: eski yük, gereksiz işler ve bitmiş ilişkiler gidiyor. Hafifleyince yeni projelere yer açılır.","İşte içine attığın bir öfke ya da hayal kırıklığı var. Bastırmak verimini düşürür; güvendiğin biriyle konuşmak iyi gelir."],
+["Kariyerinde gerçekten ne istediğini görüyorsun. Değerlerinle örtüşen bir yol netleşiyor; bu iç berraklık karar verdirir.","İşte gerçek bir rahatsızlıktan kaçıyorsun: yanlış yerde olmak, bir korku ya da bir sorun. Yüzleşmek seni hafifletecek."],
+["İşte yeni bir başlangıç: yeni bir iş, yeni bir proje ya da yeni bir sayfa. Taze enerjiyle başla, deneyim zamanla gelir.","İş fırsatı biraz geç açıyor; beklediğin cevap, terfi ya da proje gecikebilir. Sabret, çiçek vaktinde açar."],
+["İşte başarı ve görünürlük zamanı. Emeğin fark ediliyor, ödül ya da takdir geliyor; kendi payını sahiplenmekten çekinme.","İşte kibir ya da fazla özgüven seni yanıltabilir. Başarıyı ekiple paylaş ve eleştiriye açık kal."],
+["Kariyer dileğin yola çıktı. Hedefini net söyle ve yazılı bir plana çevir; dilekler planla güçlenir.","İşte hayal kuruyorsun ama plan yok. Dilek tek başına terfi getirmez; küçük ve ölçülebilir bir hedef belirle."],
+["İşte dengeli ve sakin bir dönem. Acele etmeden, kaliteli çalışmak ve düşünmek için çok uygun bir zaman.","İşte durgunluk var: motivasyon düşük, ilerleme yok. Küçük bir yenilik ya da yeni bir hedef gölü dalgalandırır."],
+["İşte öğrenme dönemi: bir kurs, eğitim ya da yeni bir bilgi seni öne çıkaracak. Okuduğun şey terfi kapısı olabilir.","İşte elindeki bilgi eksik ya da yanlış olabilir. Rakamı, sözleşmeyi ve söylentileri teyit etmeden karar verme."],
+["İş sorununun çözümü yakın: yeni bir bakış ya da doğru kişiyle konuşmak kilidi açacak. Pratik bir çözüm elinde.","İşte takılı kalmış bir mesele var; aynı yöntemle tekrar tekrar deniyorsun. Yöntemi değiştirmek anahtarı bulduracak."],
+["İşte gördüğün her şey göründüğü gibi olmayabilir; bir vaat ya da teklif fazla parlak olabilir. İmzadan önce her şeyi doğrula.","İş hayatında gerçek ortaya çıkıyor: kimin ne yaptığı, neyin işe yaramadığı belli oluyor. Bu netlik seni doğru karara götürür."],
+["İşte zekâ ve strateji ön planda: müzakerede ve ikna işlerinde güçlüsün. Kurnazlığı dürüstlükle dengele.","İş ortamında ikiyüzlülük ya da gizli bir niyet olabilir. Sözleri ve yazılı kayıtları koru; kimseye körü körüne güvenme."],
+["İşte bağımsızlık ön planda: serbest çalışma, kendi işini kurma ya da özerk bir alan istiyorsun. Kendi yolunu çizmek için iyi bir zaman.","İşte yalnız kalmış ya da dışlanmış hissediyorsun. Destek istemek zayıflık değil; ekip ya da mentor yardımı iyi gelir."],
+["İşte itibarın güçlü: dürüstlüğün ve olgun duruşun saygı görüyor. Liderlik ya da sorumluluk teklifi gelebilir.","Gurur işte engel çıkarıyor: yardım istememek, hatayı kabul etmemek. Alçakgönüllülük kariyerini hızlandırır."],
+["İşten bir haber geliyor: bir teklif, mülakat ya da proje cevabı. Telefonunu ve e-postanı kontrol etmeyi unutma.","İşle ilgili hoş olmayan bir haber ya da söylenti olabilir. Panik yapmadan önce kaynağını doğrula."],
+["İşte şans yanında: doğru zamanda doğru yerde olmak fırsat getiriyor. Karşına çıkan ilk fırsata atılmaktan çekinme.","İşte bir fırsatı kaçırmış ya da kaçırmak üzeresin. Hızlı karar vermen gereken bir an yaklaşıyor."],
+["İşte bir proje ya da dönem tamamlanıyor, yeni bir döngü başlıyor. Geçmiş deneyimini bir sonraki adımda kullan.","İşte aynı sorunlar tekrar ediyor: aynı kişi, aynı hata, aynı tıkanıklık. Döngüyü kırmak için yöntemini değiştir."],
+["İşte sabır ödüllendiriliyor. Yavaş ama sağlam ilerleyen iş kalıcı olur; istikrar bu dönem seni öne çıkaracak.","İşte ilerleme çok yavaş ve bunaltıcı. Beklemekle eylemsizliği karıştırma; küçük ama somut bir adım at."],
+["İşte akıştasın: işler kolaylaşıyor, doğru insanlar ve doğru işler yolunu buluyor. Esnek kalmak avantaj.","İşte akıntıya karşı kürek çekiyorsun; belki yanlış projeyi ya da yanlış yöntemi zorluyorsun. Yön değiştirmek yorgunluğu azaltır."],
+["İşte emeğinin karşılığını almaya yaklaşıyorsun: ekip çalışması ve düzenli üretim ödül getirir. Takım ruhu seni öne çıkarır.","İşte verdiğin emeğin karşılığı yok gibi; fazla yük ya da takdir görmeme var. Sınırlarını konuşma zamanı."],
+["İşte profesyonel ve zarif bir görünüm seni öne çıkarıyor. Sunumlar, toplantılar ve ilk izlenim güçlü geçecek.","İşte imaj ve gösteriş içeriğin önüne geçebilir. Gösterişten çok somut sonuç göstermek güven kazandırır."],
+["İşte uzlaşma ve huzur: bir anlaşmazlık çözülüyor, iş birliği güçleniyor. Uyumlu bir ortam verimini artırır.","İş yerinde gerginlik ve çekişme var. Küçük anlaşmazlıkları büyütmeden, soğukkanlı ve net iletişim kur."],
+["İşte bir uyarı çalıyor: bir sözleşme, bir son tarih ya da bir risk. Küçük görünen detayı ciddiye al.","İşteki uyarı işaretlerini duymazdan geliyorsun. Ertelediğin konular büyüyor; bugün birini yüzleşerek kapat."],
+["İşte kaderini belirleyecek bir karar yaklaşıyor. Cesur ve net bir hamle kariyerinde dönüm noktası olabilir.","İşte korkunla büyük bir adımı erteliyorsun. Hazır olmayı bekleme; küçük cesur adımlar kılıcı çekmene yardım eder."],
+["İşte otorite ve liderlik: yönetici bir rol, güçlü bir destekçi ya da sorumluluk. Adil ve net olmak seni büyütür.","İş yerinde baskıcı bir yönetim ya da senin sertliğin sorun yaratıyor. Güç dinlemekten gelir; katı olmak yerine esnek ol."],
+["İşte tutkuyla yaptığın bir iş seni besliyor. Kalbinin sevdiği alanda çalışmak verim ve mutluluk getirir.","İşte kalbin yok: sevmediğin bir işte kırılganlık hissediyorsun. Anlam arayışın seni yeni bir alana yönlendirebilir."],
+["Kariyerde çark dönüyor: beklenmedik bir değişiklik, yeni bir konum ya da ani bir fırsat. Uyum sağlayanlar kazanır.","İşte gelen değişime direniyorsun. Eski düzen artık çalışmıyor; kabul etmek ve uyum sağlamak seni öne geçirir."],
+["İşte hareketlilik var: seyahat, taşınma, yeni görevler ya da hızlı gelişmeler. Esnek ve hazırlıklı olmak avantaj.","İşte dağınıklık ve savrulma var: çok iş, çok yön, az odak. Önceliklerini sırala ve tek işe yoğunlaş."],
+["İşte ani bir sarsıntı olabilir: ani değişiklik, işten ayrılma ya da yeniden yapılanma. Yıkılan şey zaten zayıftı.","İşte yaklaşan bir krizi görmezden geliyorsun. Önceden önlem almak hasarı azaltır; sorunu ertelemeden yüzleş."],
+["İşte cazip bir teklif ya da proje çıkıyor. Parlak görünebilir; detayları oku, sonra heyecanlan.","İş ortamında göz boyayan bir teklif ya da tuzak olabilir. Fazla iyi görünen her şeyi iki kez kontrol et."],
+["İşte zamanlama çok önemli: teslim tarihleri, görüşme saatleri ve fırsat pencereleri. Zamanını verimli kullanan kazanır.","İşte geç kalıyorsun ya da zaman daralıyor. Öncelik belirle, gerekirse yardım iste; her şeyi mükemmel yapmaya çalışma."],
+["Kariyerinde bir yolculuk var: yeni bir şehir, yeni bir görev ya da iş gezisi. Bilinmeyene çıkmak seni geliştirir.","İşte yönünü kaybetmiş hissediyorsun; neye hizmet ettiğini bilmiyorsun. Kısa vadeli bir hedef belirleyip adım adım ilerle."],
+["İşte yaratıcılık ve neşe: işini keyifle yaptığında verim artıyor. Ekibe pozitif enerji katıyorsun.","İşte fazla rahat davranış ya da sorumsuzluk sorun çıkarabilir. Eğlence güzel ama teslim tarihleri de var."],
+["İşte maddi ve manevi bolluk: prim, terfi ya da yeni bir gelir kapısı. Emeğin değer kazanıyor.","İşte kaynak kıtlığı var: bütçe, kadro ya da fırsat az. Eldekini akıllıca kullan, yeni gelir kaynağı araştır."],
+["İşte bir söz ya da sözleşme geliyor: iş birliği, ortaklık ya da imza. Sözünde duran biri olarak güven kazanırsın.","İşte verilen bir söz bozulabilir. Yazılı güvence al ve sözleri yalnızca gerçekçi olduğunda ver."],
+["Kariyerinde adım adım yükseliyorsun: terfi, yetkinlik ya da prestij. Basamakları sabırla çıkmak kalıcı başarı getirir.","İşte yükselirken kayma ve yetersizlik korkusu var. Başarını hak ettiğini unutma; destek almak düşmeni önler."],
+["İş hayatında bir korku var: başarısızlık, işten çıkarılma ya da eleştirilme endişesi. Bu korku seni temkinli yapıyor ama durdurmasın.","İşte korkunu aşıyorsun: bir sunum, bir görüşme ya da zor bir konuşma. Cesaretin seni ileri taşıyor."],
+["İşte bereket akıyor: gelir, müşteri ve fırsat artıyor. Emeklerinin akışa dönüştüğü bir dönem.","İşte gelir ya da iş akışı azalıyor. Müşterini, projeni ve kaynaklarını yeniden gözden geçirip yeni kanallar aç."],
+["İşte fırtınadan sonra mutlu bir dönem: proje başarıyla bitiyor, ekip neşeleniyor. Emek ödülünü alıyor.","İş hayatında heyecan solmuş; rutin ve yorgunluk hâkim. Yeni bir hedef ya da küçük bir değişiklik rengi geri getirir."]
+],
+para:[
+["Maddi hayatında bir dönüşüm var: gelir biçimin, harcama düzenin ya da yatırım anlayışın değişiyor. Yeni düzene alışmak biraz zaman alır.","Para konusunda eski alışkanlıklara tutunuyorsun; eski harcama biçimi artık işlemiyor. Bütçeni yenilemek seni ferahlatır."],
+["Maddi kararlarda sana yol gösterecek bir fikir ya da kişi var. Danışmak, araştırmak ve sakin kalmak seni doğru yöne götürür.","Para konusunda kafa karışıklığı var; çok farklı öneri duyuyorsun. Kendi bütçeni ve hedefini yazıp kararını ona göre ver."],
+["Para işlerinde güvenilir bir bağlantı ya da ortaklık kuruluyor. Sağlam ilişkilerle sağlam kazanç gelir.","Maddi bir ortaklıkta ya da aile içi para işlerinde kopukluk var. Açık hesap uzun vadeli güveni korur."],
+["Para konusunda küçük ama umut verici bir işaret var: beklediğin bir ödeme, bir indirim ya da ek gelir ihtimali.","Maddi umutların sönmüş gibi; sıkıntı morali bozuyor. Küçük bir tasarruf planı umudu geri getirir."],
+["Maddi konuda bir eşikte duruyorsun: yeni bir gelir kapısı ya da bir karar yaklaşıyor. Sis dağılınca net göreceksin.","Maddi bir kapı kapalı: başvuru, kredi ya da teklif gecikiyor. Bekle, bu sırada elindeki kaynakları düzenle."],
+["Maddi sıkıntılarda bir hafifleme söz konusu: borç azalıyor ya da gider düzeni toparlanıyor. Sakin bir rahatlama var.","Para konusundaki yorgunluk seni tüketiyor. Tek seferde çözmeye çalışma; küçük adımlarla bütçeyi iyileştir."],
+["Para konusunda sezgin güçlü; hangi harcamanın, hangi fırsatın değerli olduğunu hissediyorsun. Hisle birlikte rakamlara da bak.","Para işlerinde kör nokta var: gözden kaçan bir gider, aidat ya da gizli maliyet. Hesaplarını bir kez daha kontrol et."],
+["Küçük bir birikim ya da fikir büyümeye hazır. Düzenli ve küçük bir tasarruf zamanla ciddi bir birikime dönüşür.","Birikim ya da gelir için bir fikrin var ama başlamıyorsun. Küçük bir tutarla bile bugün başlamak yarını değiştirir."],
+["Parayı korumak için sınırlar koyuyorsun: bütçe, harcama limiti ve hayır diyebilmek. Bu çit gelirini korur.","Para konusunda fazla katı ya da fazla savunmasızsın. Ya cimrilik ya savurganlık seni zorluyor; dengeyi bul."],
+["Maddi yüklerde bir arınma var: gereksiz abonelikler, harcamalar ve borçlar gidiyor. Hafifleyince birikim kolaylaşır.","Para konusunda içine attığın bir kaygı ya da suçluluk var. Hesaplarına bakmaktan kaçmak durumu kötüleştirir; yüzleşmek ferahlatır."],
+["Paranla ilgili gerçeği görüyorsun: ne kazandığın, ne harcadığın net. Bu şeffaflık sana güç verir.","Para konusunda kaçınıyorsun: hesaba bakmamak, borcu görmezden gelmek. Cesaretle bakınca çözüm de görünür."],
+["Maddi hayatında yeni bir başlangıç var: yeni gelir, yeni bütçe ya da yeni iş. Temiz bir sayfa açma zamanı.","Maddi toparlanma biraz geç açıyor. Sabır ve düzenli takip sonunda sonuç getirir; acele kararlardan kaçın."],
+["Maddi başarı ve görünürlük var: kazanç artıyor ya da bir ödül geliyor. Emeğinin karşılığını almak için doğru zaman.","Para konusunda kibir ya da gösteriş savurganlığa yol açabilir. Başarını harcamak yerine büyütmeyi seç."],
+["Maddi bir dileğin yola çıktı. Net bir hedef koyup düzenli adım atarsan dilek gerçekliğe yaklaşır.","Para için hep hayal kuruyorsun ama plan yok. Şansa bel bağlamak yerine küçük ve istikrarlı bir tasarruf düzeni kur."],
+["Maddi olarak sakin bir dönem: gelir giderin dengede, gürültüsüz bir rahatlık var. Bu dinginliği korumak için düzenli kal.","Maddi durgunluk var: gelir artmıyor, birikim ilerlemiyor. Yeni bir kaynak ya da beceri geliştirmek akışı başlatır."],
+["Para konusunda öğrenme zamanı: bütçeleme ya da yatırım bilgisi sana ciddi fayda sağlar. Bir kitap ya da kurs iyi bir yatırım.","Para konusunda yanlış ya da eksik bilgiye dayanıyorsun. Duyuma değil, güvenilir kaynaklara dayan."],
+["Maddi bir sıkıntının çözümü yakın: yeni bir yöntem, bir indirim ya da doğru kişiyle konuşmak. Pratik bir çıkış var.","Para sıkıntısında aynı çözümü tekrar tekrar deniyorsun. Farklı bir yöntem ya da yardım istemek kilidi açar."],
+["Para konusunda parlak görünen bir şey yanıltıcı olabilir: yüksek getiri vaadi, hızlı kazanç. Göz boyayan her şeyden temkinli ol.","Maddi konuda gerçek ortaya çıkıyor: gizli bir gider, gerçek durum ya da bir hata. Netleşmek rahatsız eder ama doğru karara götürür."],
+["Para konusunda zekân işe yarıyor: pazarlık, fırsat bulma, akıllı alışveriş. Kurnazlığı dürüstlükle dengele.","Maddi bir işte kandırılma ya da yarım gerçek ihtimali var. Sözleşmeyi oku, kanıt iste ve aceleye gelme."],
+["Maddi bağımsızlığa yürüyorsun: kendi gelirini kurmak ve kimseye bağlı olmamak istiyorsun. Planlı adımlarla özgürlük gelir.","Maddi olarak yalnız ve desteksiz hissediyorsun. Yardım istemek ve bilgili birine danışmak yükü hafifletir."],
+["Para konusunda onurlu ve dürüst bir duruş var: borcunu öder, sözünü tutarsın. Bu itibar uzun vadede kazanç getirir.","Para konusunda gurur seni zor durumda bırakıyor: yardım istememek ya da gösteriş. Alçakgönüllü olmak maddi olarak da rahatlatır."],
+["Para ile ilgili bir haber geliyor: ödeme, teklif ya da bildirim. Mesajlarını ve e-postalarını kontrol et.","Maddi bir haber hoşuna gitmeyebilir: zam, fatura ya da ek masraf. Önceden hazırlıklı olmak şoku azaltır."],
+["Maddi şans yanında: ufak bir kazanç, indirim ya da beklenmedik bir ödeme. Ama şansa yaslanma, yine de planlı ol.","Maddi bir fırsat kaçmış olabilir. Yeni fırsatı yakalamak için bütçeni hazır tut ve hızlı karar vermeye hazırlan."],
+["Para döngüsü tamamlanıyor: bir ödeme dönemi bitiyor, yeni bir gelir dönemi başlıyor. Geçmişten öğrendiklerini kullan.","Para konusunda aynı hataya dönüyorsun: aynı harcama, aynı borç. Otomatik tasarruf ve limit koymak döngüyü kırar."],
+["Para birikimi yavaş ama güvenli: düzenli tasarruf ve sabırlı bir plan sonunda kazandırır. Acele etme.","Maddi durum çok yavaş ilerliyor gibi bunaltıcı. Beklemekle eylemsizliği ayır; küçük bir gelir artışı için adım at."],
+["Para akışı iyi: gelir ve gider dengeli akıyor. Esnek davranmak ve fırsata uyum sağlamak kazandırır.","Parayla akıntıya karşı gidiyorsun: gereksiz risk ya da zorlama bir harcama. Daha sakin ve uyumlu bir yol seç."],
+["Paranın emek karşılığı geliyor: düzenli çalışma, ek gelir ve ekip kazancı. Küçük küçük biriktirmek petek gibi dolar.","Verdiğin emek maddi olarak karşılığını bulmuyor gibi. Fiyatını, ücretini ya da pazarlığını gözden geçir."],
+["Maddi olarak zarif ve düzenli bir dönem: lüks yerine kaliteli seçimler seni rahatlatır. Akıllı alışveriş kazandırır.","Gösteriş için yapılan harcama bütçeni zorluyor. Gerçek ihtiyaç ile imaj için yapılan harcamayı ayır."],
+["Maddi konuda uzlaşma var: borç yapılandırması, paylaşım anlaşması ya da aile içinde para konusunda barış. Huzur geliyor.","Para yüzünden gerginlik var: aile, ortak ya da eşle tartışma. Rakamları yazıp sakin bir masada konuşmak çözer."],
+["Para konusunda bir uyarı çalıyor: bir ödeme tarihi, bir risk ya da yanlış bir harcama. Hatırlatmaları ciddiye al.","Para konusunda uyarıları duymazdan geliyorsun: ertelenen faturalar, birikmeyen bütçe. Bu hafta bir kez hepsine bak."],
+["Maddi hayatında kader anı: büyük bir karar ya da bir dönüm noktası. Bilgiyle ve cesaretle atacağın adım uzun vadeli etkili olur.","Maddi bir karardan korkuyla kaçıyorsun. Hazır olmayı beklemek yerine küçük ve ölçülü bir adım at."],
+["Para konusunda otorite ve disiplin var: bütçeyi sen yönetiyorsun ya da güçlü bir destek var. Düzen kazanç getirir.","Para konusunda baskı ya da kontrol sorun yaratıyor: aşırı kıskançlık, zorlama ya da ağır bir borç. Esnek ve adil olmak gerek."],
+["Sevdiğin şeye yaptığın harcama mutluluk getiriyor. Kalbin için ayıracağın bütçe boşa gitmez; dengeyi koru.","Duygusal harcama bütçeni zorlayabilir: sevgi için aşırı verme ya da teselli alışverişi. Duygunu ve parayı birbirinden ayır."],
+["Maddi hayatta çark dönüyor: ani bir gelir ya da gider değişimi. Hazırlıklı olanlar bu dönemde kazanır; acil durum payı ayır.","Maddi değişime direniyorsun. Eski gelir düzeni artık yetmiyor; esneyip yeni bir kaynağa açıl."],
+["Parada hareket var: ödemeler, seyahat harcamaları ya da gelir hareketliliği. Esnek bir bütçe seni rahat ettirir.","Paran savruluyor: dağınık harcama, takipsiz giderler. Kategori kategori bütçe yapmak seni toparlar."],
+["Para konusunda ani bir sarsıntı olabilir: beklenmedik bir masraf ya da kayıp. Acil durum fonu ve ihtiyat seni korur.","Yaklaşan bir maddi sıkıntıyı görmezden geliyorsun. Erken önlem hasarı küçültür; hesaplarına şimdi bak."],
+["Parlak görünen maddi bir teklif çıkabilir. Büyülü görünen şeyi iki kez kontrol et, sonra karar ver.","Para konusunda göz boyayan bir tuzak olabilir: dolandırıcılık, aşırı vaat ya da riskli bir oyun. Şüphe iyi bir koruma."],
+["Maddi zamanlama önemli: ödeme günleri, vadeler ve fırsat zamanı. Zamanında yapılan küçük bir hamle değerlidir.","Ödeme ya da karar için zaman daralıyor, geç kalmak masraf yaratabilir. Gecikmiş işlerini bugün sıraya koy."],
+["Maddi bir yolculuk var: seyahat için birikim, taşınma ya da uzaktan gelir. Yolun masrafını önceden planla.","Parayla ilgili yönünü kaybetmişsin; nereye harcadığını bilmiyorsun. Bir hafta boyunca harcamalarını not etmek yol gösterir."],
+["Para konusunda neşe var: küçük bir ödül, hediye ya da keyifli harcama iyi gelir. Eğlenmek için yer ayır ama ölçülü ol.","Para konusunda sorumsuzluk var: düşünmeden harcama ve plansızlık. Keyif ile bütçe arasına bir çizgi çek."],
+["Maddi bolluk kartı: gelir, birikim ve beklenmedik ek kazanç ihtimali. Sandığın dolması için dengeli ve akıllı yönet.","Maddi kıtlık hissi var: gelirin gideri karşılamıyor gibi. Zorunlu harcamaları önceliklendir, gereksiz giderleri kıs."],
+["Para konusunda bir söz ya da sözleşme var: kira, ortaklık ya da anlaşma. Yazılı ve net olması gelecekte rahatlatır.","Maddi bir söz bozulabilir: ödeme sözü, ödünç ya da ortaklık. Yazılı güvence al ve söz vermeden önce iki kez düşün."],
+["Maddi olarak adım adım yükseliyorsun: birikim, gelir artışı ve itibar. Küçük ama düzenli yükseliş kalıcı olur.","Para konusunda yükselirken kayma korkusu var: kayıp endişesi. Acil durum fonu ve çeşitlendirme kaygıyı azaltır."],
+["Para konusunda bir korku var: kayıp, yetersizlik ya da gelecek kaygısı. Rakamlara bakarak korkuyu somutlaştırmak onu küçültür.","Para korkunu aşıyorsun: hesaplara bakmaya, bütçe yapmaya ve plan kurmaya cesaret ediyorsun. Bu cesaret maddi özgürlüğe açılır."],
+["Maddi bereket akıyor: gelir artıyor, kaynak çoğalıyor. Nehirden aldığını paylaşmak ve biriktirmek de bereketi artırır.","Maddi kaynak azalıyor: nehir kuruyor gibi. Yeni gelir kaynakları ve tasarruf yolları aramanın zamanı."],
+["Maddi fırtınadan sonra rahatlama var: borç kapanıyor, gelir düzeliyor ya da güzel bir sürpriz geliyor. Düzenini koru.","Maddi tarafta renkler solmuş; bunaltı ya da sıkıntı var. Küçük bir tasarruf başarısı bile moral verir."]
+]
 };
 const TOPSUM={
 ask:{bright:"Aşk ve ilişkiler cephesinde kartlar ılık konuşuyor: kalbin yumuşuyor ve ilgi görüyorsun.",mixed:"Aşk konusunda hem yakınlık hem tereddüt var; kalbinle aklını aynı masaya oturtman lazım.",heavy:"Gönül tarafında kartlar temkinli; kırgınlıkları büyütmeden konuşmak ve kendine şefkat göstermek bu dönemin ilacı."},
@@ -840,13 +987,35 @@ warn:["Bugün \"{kw}\" bir dikkat işareti taşıyor; acele etme, söylemeden ö
 bad:["Bugün \"{kw}\" gölge düşürebilir; kendine nazik ol, ertelediğin küçük bir şeyi halletmek içini rahatlatır.","Bugün \"{kw}\" bir fısıltı gibi geliyor: yoruluyorsan dinlen, kırılganlığını saklama."]
 };
 function moodOf(list){const sc=list.reduce((a,d)=>a+toneOf(d),0)/list.length;return sc>=0.4?'bright':(sc<=-0.1?'heavy':'mixed')}
+const HAC=[
+["Durumun özünde {nm} var: \"{kw}\" bu meselenin kalbi ve her şey bunun etrafında dönüyor. Bunu kabul etmek yolu kısaltır.","Durumun özünde {nm} ters duruyor: \"{kw}\" konusunda bir düğüm var ve asıl mesele göründüğünden daha derinde."],
+["Geride bıraktığın şey {nm}: \"{kw}\" artık hikâyenin eski bir sayfası ve o sayfayı çevirmek seni hafifletecek.","Geride bıraktığını sandığın şey {nm} ters: \"{kw}\" hâlâ içinde bir yerde açık duruyor ve kapanmadan yola devam etmek zor."],
+["Önüne çıkacak olan {nm}: \"{kw}\" yaklaşıyor ve seni hazırlıklı bulmak için sabırsızlanıyor.","Önüne çıkacak olan {nm} ters: \"{kw}\" bir sınav gibi gelecek ama hazırlıklı olursan sandığından hafif geçer."],
+["Altta yatan neden {nm}: \"{kw}\" bu işin görünmeyen kökü ve onu fark etmek çözümün yarısı.","Altta yatan neden {nm} ters: \"{kw}\" konusunda kendinle bile konuşmadığın bir şey var; kök orada."],
+["Üstündeki hedef {nm}: \"{kw}\" senin gökyüzün, oraya doğru gidiyorsun ve yolun doğru.","Üstündeki hedef {nm} ters: \"{kw}\" hedefini bulanıklaştırıyor; ne istediğini bir kez daha netleştirmen gerekiyor."]
+];
+const IKI=[
+["Sen kartında {nm} var: \"{kw}\" bu ilişkide senin getirdiğin enerji ve bunu olduğu gibi yaşıyorsun.","Sen kartın {nm} ters: \"{kw}\" konusunda bu ilişkide kendini tam olarak ifade edemiyorsun, bir şeyler içinde kalıyor."],
+["O kartında {nm} duruyor: \"{kw}\" onun bu ilişkideki hâli ve sana gösterdiği yüzü bu.","O kartı {nm} ters geldi: \"{kw}\" konusunda karşındakinin söylemediği ya da zorlandığı bir şey var."],
+["Aranızdaki bağ {nm}: \"{kw}\" ikinizi birbirine bağlayan enerji ve bunun gücü hissediliyor.","Aranızdaki bağ {nm} ters: \"{kw}\" ikinizin arasında gerginlik ya da mesafe yaratıyor; açık bir konuşma bu bağı onarabilir."]
+];
+const AY=[
+["Ayın ilk haftasında {nm} var: \"{kw}\" ile açılıyor ve başlangıç enerjisi bu kartın renginde.","Ayın ilk haftası {nm} ters başlıyor: \"{kw}\" ile biraz sendeleyerek açılıyorsun, yavaş başla."],
+["İkinci haftada {nm} geliyor: \"{kw}\" ay boyunca seni yönlendirecek asıl tema olabilir.","İkinci hafta {nm} ters: \"{kw}\" yüzünden planlar gecikebilir, sabırlı ol."],
+["Üçüncü haftada {nm} çıkıyor: \"{kw}\" ayın kilit noktası ve karar anı buraya denk geliyor.","Üçüncü hafta {nm} ters: \"{kw}\" ile ilgili bir tıkanıklık olabilir, zorlamak yerine yöntemini değiştir."],
+["Son haftada {nm} seni bekliyor: \"{kw}\" ayı kapatan kart ve sonucun rengi bu.","Son hafta {nm} ters: \"{kw}\" ayın sonunda bir uyarı gibi duruyor, bir sonraki aya taşıyacağın bir ders var."]
+];
+const YU=["{month} ayında {nm} seni karşılıyor: \"{kw}\" bu ay hayatında belirgin olacak.","{month} ayının kartı {nm}: \"{kw}\" enerjisi ay boyunca çevrende dolaşacak.","{month} ayında {nm} çıktı, yani \"{kw}\": bu ay sana destek olacak bir işaret."];
+const YR=["{month} ayında {nm} ters geliyor: \"{kw}\" konusunda bu ay biraz temkinli olman gerek.","{month} ayının kartı {nm} ters: \"{kw}\" bir uyarı olarak çıkıyor, küçük bir engele hazırlıklı ol.","{month} ayında {nm} ters çıktı: \"{kw}\" bu ayın gölgesi ama geçici."];
+const fillM=(t,d,m)=>fill(t,d).split('{month}').join(m);
 function summaryParas(){
   if(sumParas)return sumParas;
   const n=drawn.length,q=$('q').value.trim(),nm=getName();
   const rev=drawn.filter(d=>d.rev).length,up=n-rev;
   const mood=moodOf(drawn);
-  const time=pickOne(TIMES);
+  const time=spread==='ay'?'Ay ilerledikçe':(spread==='yil'?'Yıl ilerledikçe':pickOne(TIMES));
   const hi=t=>nm?nm+', '+lf(t):t;
+  const kw=i=>kwOf(drawn[i]),cn=i=>C[drawn[i].ci].n,useUp=d=>!d.rev||toneOf(d)>0;
   const P=[];
   if(n===1){
     const d=drawn[0],c=C[d.ci];
@@ -856,12 +1025,23 @@ function summaryParas(){
     P.push((q?'Sorduğun "'+q+'" konusunda bu kart şunu söylüyor: ':'')+CLOSE1[mood].split('{time}').join(time));
     P.push((nm?nm+', k':'K')+'artlar tahmin etmez, işaret eder. Gerisi senin ellerinde.');
   }else{
-    const T=n===3?T3:T5;
+    const L=spLabels(spread,curEntry?curEntry.t:Date.now());
     P.push(hi('Masaya serdiğim '+n+' kartın '+up+' tanesi düz, '+rev+' tanesi ters geldi. '+pickOne(MOOD[mood])));
     if(topic!=='genel')P.push(TOPSUM[topic][mood]);
-    drawn.forEach((d,i)=>{const useUp=!d.rev||toneOf(d)>0;P.push(fill(T[i][useUp?0:1],d))});
-    const a=drawn[0],b=drawn[n-1];
-    P.push('Hikâyenin başında '+C[a.ci].n+', sonunda '+C[b.ci].n+' duruyor; yani "'+kwOf(a)+'" hâlinden "'+kwOf(b)+'" hâline doğru yürüyorsun. Aradaki kartlar bu yolculuğun nasıl geçeceğini anlatıyor.');
+    if(spread==='yil'){
+      drawn.forEach((d,i)=>P.push(fillM((useUp(d)?YU:YR)[(d.ci+i)%3],d,L[i])));
+      let bi=0,wi=0;
+      drawn.forEach((d,i)=>{if(toneOf(d)>toneOf(drawn[bi]))bi=i;if(toneOf(d)<=toneOf(drawn[wi]))wi=i});
+      if(toneOf(drawn[bi])===toneOf(drawn[wi]))P.push('Bu yıl aylar birbirine yakın bir enerjide akıyor; belirgin bir zirve ya da çukur görmüyorum, yani yılın gidişatını büyük ölçüde senin tercihlerin belirleyecek.');
+      else P.push('Yılın en parlak ayı '+L[bi]+': '+cn(bi)+' o ayı aydınlatıyor. '+(toneOf(drawn[wi])<0?'En dikkatli olman gereken ay ise '+L[wi]+': '+cn(wi)+' ters geldi, o ay acele karar verme.':'Zorlu bir ay görünmüyor, yalnızca '+L[wi]+' ayında biraz temkin gerekebilir.'));
+    }else{
+      const T=({g3:T3,g5:T5,hac:HAC,iki:IKI,ay:AY})[spread];
+      drawn.forEach((d,i)=>P.push(fill(T[i][useUp(d)?0:1],d)));
+      if(spread==='hac')P.push('Haçın ortasında '+cn(0)+', yukarısında '+cn(4)+' duruyor; yani "'+kw(0)+'" meselesinden "'+kw(4)+'" hedefine doğru bir yol çiziyorsun. Geride bıraktığın "'+kw(1)+'" ile önüne çıkacak "'+kw(2)+'" arasındaki farkı görmek, altta yatan "'+kw(3)+'" konusuna dokunmanı sağlayacak.');
+      else if(spread==='iki')P.push('Sen "'+kw(0)+'" hâlindesin, o ise "'+kw(1)+'" hâlinde; ikinizin biraz farklı ritimlerde yürüdüğünü görüyorum. '+(toneOf(drawn[2])>0?'Aranızdaki bağ kartı güçlü, yani bu fark ilişkiyi ayakta tutan bir çeşitlilik olabilir.':(toneOf(drawn[2])<0?'Aranızdaki bağ kartı ters geldi; bu fark konuşulmazsa mesafeye dönüşebilir, bu yüzden dürüst ve nazik bir konuşma şart.':'Bağ kartı bir dikkat işareti taşıyor; farkı kabul edip birbirinize acele etmeden zaman tanımalısınız.')));
+      else if(spread==='ay')P.push('Ay "'+kw(0)+'" ile açılıyor ve "'+kw(3)+'" ile kapanıyor; haftalar arasındaki geçişi izlersen bir sonraki aya hazır girersin.');
+      else P.push('Hikâyenin başında '+cn(0)+', sonunda '+cn(n-1)+' duruyor; yani "'+kw(0)+'" hâlinden "'+kw(n-1)+'" hâline doğru yürüyorsun. Aradaki kartlar bu yolculuğun nasıl geçeceğini anlatıyor.');
+    }
     P.push((q?'Sorduğun "'+q+'" konusuna gelirsek: ':'')+CLOSE[mood].split('{time}').join(time));
     P.push((nm?nm+', u':'U')+'nutma, kartlar kaderi yazmaz, yönü gösterir. Pusulayı tutan sensin.');
   }
@@ -875,7 +1055,7 @@ function showSummary(){
   w.appendChild(e);w.appendChild(h);
   const P=summaryParas();
   if(curEntry&&!curEntry.sum){curEntry.sum=P;histSave(curEntry)}
-  P.forEach((t,i)=>{const p=document.createElement('p');p.className='mean';p.textContent=t;p.style.animationDelay=(reduce?0:i*0.35)+'s';w.appendChild(p)});
+  P.forEach((t,i)=>{const p=document.createElement('p');p.className='mean';p.textContent=t;p.style.animationDelay=(reduce?0:Math.min(i*0.35,2.5))+'s';w.appendChild(p)});
   box.appendChild(w);
   const dn=document.createElement('p');dn.className='muted';dn.style.cssText='font-size:13px;margin-top:8px';dn.textContent='Bu fal eğlence amaçlıdır; önemli kararlarını kartlara bırakma.';box.appendChild(dn);
   sfx('chime');vibe([20,40,20]);
@@ -938,7 +1118,7 @@ function buildHist(){
   h.forEach(e=>{
     const b=document.createElement('button');b.type='button';b.className='hitem';
     const dt=new Date(e.t);
-    const lab=e.kind==='daily'?'Günün kartı':(TOPICS[e.topic]||'Genel')+' · '+e.n+' kart';
+    const lab=e.kind==='daily'?'Günün kartı':(SPREADS[e.sp||({1:'g1',3:'g3',5:'g5'})[e.n]]||SPREADS.g3).t+(e.topic&&e.topic!=='genel'?' · '+TOPICS[e.topic]:'');
     b.innerHTML='<div class="hmeta"><span>'+dt.toLocaleDateString('tr-TR',{day:'numeric',month:'long'})+' · '+dt.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})+'</span><span>'+lab+'</span></div>'
       +'<div class="hmini">'+e.cards.map(c=>'<div>'+art(c.ci,c.rev)+'</div>').join('')+'</div>'
       +'<div class="hnames">'+e.cards.map(c=>esc(C[c.ci].n)+(c.rev?' (ters)':'')).join(' · ')+'</div>'
@@ -949,7 +1129,7 @@ function buildHist(){
 }
 function openHist(id){
   const e=histAll().find(x=>x.id===id);if(!e)return;
-  curEntry=e;drawn=e.cards.map(c=>({ci:c.ci,rev:c.rev}));want=drawn.length;topic=e.topic||'genel';
+  curEntry=e;drawn=e.cards.map(c=>({ci:c.ci,rev:c.rev}));want=drawn.length;topic=e.topic||'genel';spread=e.sp||({1:'g1',3:'g3',5:'g5'})[e.n]||'g3';
   $('q').value=e.q||'';
   buildResult();sumParas=e.sum||null;
   go('result');
@@ -989,7 +1169,6 @@ $('h-clear').onclick=()=>{
   if(b.dataset.arm){sset('of_hist',[]);delete b.dataset.arm;b.textContent='Geçmişi temizle';buildHist();toast('Geçmiş temizlendi')}
   else{b.dataset.arm='1';b.textContent='Emin misin? Tekrar dokun';setTimeout(()=>{delete b.dataset.arm;b.textContent='Geçmişi temizle'},3000)}
 };
-document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{want=+b.dataset.n;sel=[];buildPick();go('pick');sfx('tap')});
 document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{setTopic(c.dataset.t);sfx('tap')});
 $('b-reveal').onclick=reveal;
 $('b-clear').onclick=()=>{sel=[];$('pick-msg').textContent='';updatePick()};
@@ -1013,7 +1192,7 @@ $('b-skip').onclick=()=>{if(phase===0)finishHold()};
 document.querySelectorAll('.fan .c').forEach(e=>e.innerHTML=BACK);
 document.querySelectorAll('.stack .c').forEach(e=>e.innerHTML=BACK);
 $('nm').value=sget('of_name','');
-paintSnd();refreshHome();
+buildOpts();paintSnd();refreshHome();
 </script>
 
 </body>
