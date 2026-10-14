@@ -199,11 +199,6 @@ body::before{content:"";position:fixed;inset:-25%;z-index:-1;pointer-events:none
 .hmini svg{width:100%;height:auto;border-radius:5px}
 .hnames{font-size:15px}
 
-/* Paylaşım penceresi */
-.modal{position:fixed;inset:0;background:rgba(8,5,20,.9);z-index:20;overflow:auto;padding:16px}
-.modal .box{max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
-.modal img{width:100%;height:auto;border-radius:12px;border:1px solid var(--line)}
-
 /* Alt menü */
 nav{
   position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);
@@ -307,9 +302,7 @@ nav button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
     <div class="items" id="items"></div>
     <div id="summary"></div>
     <div class="row">
-      <button class="btn primary" id="b-share">Görsel olarak paylaş</button>
-      <button class="btn" id="b-copy">Sonucu kopyala</button>
-      <button class="btn" id="b-again">Yeniden fal bak</button>
+      <button class="btn primary" id="b-again">Yeniden fal bak</button>
     </div>
   </section>
 
@@ -335,7 +328,7 @@ nav button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
     <div id="dy-card" style="width:100%"></div>
     <p class="muted" id="dy-pre">Bu kart bugün sana özel seçildi. Dokunup çevir.</p>
     <div class="itxt" id="dy-post" hidden style="text-align:left;width:100%"></div>
-    <div class="row" id="dy-act" hidden style="width:100%"><button class="btn primary" id="dy-share" type="button">Görsel olarak paylaş</button><button class="btn" id="dy-fal" type="button">Tam fal bak</button></div>
+    <div class="row" id="dy-act" hidden style="width:100%"><button class="btn primary" id="dy-fal" type="button">Tam fal bak</button></div>
   </section>
 
   <section class="scr" id="s-hist" hidden>
@@ -356,15 +349,6 @@ nav button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
   <button id="n-hist">Geçmiş</button>
 </div></nav>
 <div class="toast" id="toast" hidden role="status"></div>
-<div class="modal" id="shm" hidden role="dialog" aria-modal="true" aria-labelledby="shm-t">
-  <div class="box">
-    <h3 id="shm-t">Paylaşım görseli</h3>
-    <img id="shm-img" alt="Falın paylaşım görseli">
-    <p class="muted" style="font-size:14px">Paylaş düğmesi çalışmazsa İndir'e bas ya da görsele uzun basıp kaydet.</p>
-    <div class="row"><button class="btn primary" id="shm-share" type="button">Paylaş</button><button class="btn" id="shm-dl" type="button">İndir</button><button class="btn" id="shm-x" type="button">Kapat</button></div>
-  </div>
-</div>
-
 <script>
 const rnd=s=>()=>(s=(s*9301+49297)%233280)/233280;
 const f=v=>Math.round(v*10)/10;
@@ -897,73 +881,7 @@ function showSummary(){
   sfx('chime');vibe([20,40,20]);
   if(!reduce&&!quiet)w.scrollIntoView({behavior:'smooth',block:'start'});
 }
-function copyText(){
-  const q=$('q').value.trim(),L=labels(drawn.length),nm=getName();
-  let t='Orman Falcısı\n'+(nm?'Fal: '+nm+'\n':'')+(topic!=='genel'?'Konu: '+TOPICS[topic]+'\n':'')+(q?'Sorum: '+q+'\n':'')+'\n';
-  drawn.forEach((d,i)=>{const c=C[d.ci];t+=L[i]+': '+c.n+(d.rev?' (ters)':'')+' - '+(d.rev?c.rk:c.k)+'\n'+(d.rev?c.rm:c.m)+'\n'+(topic!=='genel'?TOPICS[topic]+': '+fill(TN[topic][toneKey(d)][(d.ci+i)%3],d)+'\n':'')+'\n'});
-  t+='Kartların birleşimi\n\n'+summaryParas().join('\n\n');
-  return t;
-}
 function toast(m){const t=$('toast');t.textContent=m;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>{t.hidden=true},2200)}
-function doCopy(){
-  const t=copyText();
-  const fb=()=>{const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}document.body.removeChild(ta);toast(ok?'Fal kopyalandı':'Kopyalanamadı, metni elle seç')};
-  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(()=>toast('Fal kopyalandı'),fb)}else fb();
-}
-
-/* Paylaşım görseli */
-let shBlob=null,shUrl=null;
-function rr(x,a,b,w,h,r){x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath()}
-function wrapText(x,text,cx,y,maxW,lh){const words=text.split(' ');let line='',yy=y;for(const w of words){const t=line?line+' '+w:w;if(x.measureText(t).width>maxW&&line){x.fillText(line,cx,yy);line=w;yy+=lh}else line=t}if(line)x.fillText(line,cx,yy);return yy}
-function loadImg(src){return new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=src})}
-function svgSrc(i){const sv=art(i,false).replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" width="240" height="360" ');return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(sv)}
-async function makeShare(cards,topLabel,line,L){
-  const W=1080,H=1350,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
-  try{await Promise.race([Promise.all([document.fonts.load('600 70px "Cormorant Garamond"'),document.fonts.load('italic 500 40px "Cormorant Garamond"'),document.fonts.load('700 28px Mulish')]),new Promise(r=>setTimeout(r,1500))])}catch(e){}
-  const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#1a1040');g.addColorStop(1,'#0e0a1e');x.fillStyle=g;x.fillRect(0,0,W,H);
-  const gl=x.createRadialGradient(W/2,0,0,W/2,0,720);gl.addColorStop(0,'rgba(143,104,216,.45)');gl.addColorStop(1,'rgba(143,104,216,0)');x.fillStyle=gl;x.fillRect(0,0,W,H);
-  const r=rnd(7);x.fillStyle='#c9a7ff';for(let i=0;i<70;i++){x.globalAlpha=.25+r()*.5;x.beginPath();x.arc(r()*W,r()*H,r()*2.2+.6,0,6.3);x.fill()}x.globalAlpha=1;
-  const nm=getName(),serif='"Cormorant Garamond",Georgia,"Times New Roman",serif',sans='Mulish,system-ui,sans-serif';
-  x.textAlign='center';x.textBaseline='alphabetic';
-  x.fillStyle='#d8b86a';x.font='600 92px '+serif;x.fillText('Orman Falcısı',W/2,150);
-  x.fillStyle='#a99cc8';x.font='700 28px '+sans;
-  x.fillText((topLabel+(nm?' · '+nm:'')+' · '+new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long'})).toLocaleUpperCase('tr-TR'),W/2,205);
-  const n=cards.length,cw=n===1?380:(n===3?290:184),ch=cw*1.5,gap=n===1?0:(n===3?40:18);
-  const x0=(W-(n*cw+(n-1)*gap))/2,y0=n===1?270:(n===3?330:380);
-  for(let i=0;i<n;i++){
-    const cx=x0+i*(cw+gap),im=await loadImg(svgSrc(cards[i].ci));
-    x.save();x.beginPath();rr(x,cx,y0,cw,ch,16);x.clip();
-    if(cards[i].rev){x.translate(cx+cw/2,y0+ch/2);x.rotate(Math.PI);x.drawImage(im,-cw/2,-ch/2,cw,ch)}else x.drawImage(im,cx,y0,cw,ch);
-    x.restore();
-    x.strokeStyle='#d8b86a';x.lineWidth=2;x.beginPath();rr(x,cx,y0,cw,ch,16);x.stroke();
-    x.fillStyle='#a99cc8';x.font='700 '+(n===5?17:21)+'px '+sans;
-    wrapText(x,(L[i]||'').toLocaleUpperCase('tr-TR'),cx+cw/2,y0+ch+44,cw+gap-8,24);
-    x.fillStyle=cards[i].rev?'#ff8aa6':'#f2eafc';x.font='600 '+(n===5?26:(n===3?34:42))+'px '+serif;
-    wrapText(x,C[cards[i].ci].n+(cards[i].rev?' (ters)':''),cx+cw/2,y0+ch+(n===5?100:94),cw+gap-8,n===5?28:38);
-  }
-  x.fillStyle='#f2eafc';x.font='italic 500 50px '+serif;
-  wrapText(x,'“'+line+'”',W/2,1030,860,66);
-  x.fillStyle='#a99cc8';x.font='700 24px '+sans;
-  x.fillText('Orman Falcısı'+(/^https?:/.test(location.protocol)?' · '+location.host+location.pathname.replace(/\/$/,''):''),W/2,1290);
-  return new Promise(res=>cv.toBlob(res,'image/png'));
-}
-async function shareReading(cards,topLabel,line,L){
-  toast('Görsel hazırlanıyor…');
-  try{const b=await makeShare(cards,topLabel,line,L);if(!b)throw new Error('boş');showShare(b)}catch(e){toast('Görsel hazırlanamadı')}
-}
-function showShare(b){
-  shBlob=b;if(shUrl)URL.revokeObjectURL(shUrl);shUrl=URL.createObjectURL(b);
-  $('shm-img').src=shUrl;$('shm').hidden=false;$('shm-x').focus();
-}
-function closeShare(){$('shm').hidden=true}
-function shareResult(){
-  const fls=[...document.querySelectorAll('#items .flip')];
-  if(!fls.length||!fls.every(x=>x.classList.contains('open'))){toast('Önce kartları aç');return}
-  const mood=moodOf(drawn),lines=SHARELINE[mood];
-  const top=curEntry&&curEntry.kind==='daily'?'Günün kartı':(topic==='genel'?drawn.length+' kartlık fal':TOPICS[topic]+' falı');
-  shareReading(drawn,top,lines[drawn[0].ci%lines.length],labels(drawn.length));
-}
-
 /* Günün kartı: her gün cihaza özel tek kart */
 function hash32(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
 function mb32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -1013,11 +931,6 @@ function buildDaily(){
   fl.onclick=open;
   fl.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}};
 }
-function shareDaily(){
-  const d={ci:dly.ci,rev:dly.rev};
-  shareReading([d],'Günün kartı',dailyLine(d,true),['Günün mesajı']);
-}
-
 /* Geçmiş */
 function buildHist(){
   const h=histAll(),box=$('hlist');box.innerHTML='';
@@ -1067,7 +980,6 @@ function renderDetail(){
 $('b-start').onclick=startShuffle;
 $('b-guide').onclick=()=>{buildLib();go('lib')};
 $('b-daily').onclick=()=>{buildDaily();go('daily');sfx('tap')};
-$('dy-share').onclick=shareDaily;
 $('dy-fal').onclick=startShuffle;
 $('n-fal').onclick=()=>go('home');
 $('n-lib').onclick=()=>{buildLib();go('lib')};
@@ -1083,8 +995,6 @@ $('b-reveal').onclick=reveal;
 $('b-clear').onclick=()=>{sel=[];$('pick-msg').textContent='';updatePick()};
 $('b-reshuffle').onclick=()=>{shuffleDeck();buildPick();sfx('flip');toast('Kartlar yeniden karıştırıldı')};
 $('b-all').onclick=openAll;
-$('b-copy').onclick=doCopy;
-$('b-share').onclick=shareResult;
 $('b-again').onclick=startShuffle;
 $('b-back').onclick=()=>go('lib');
 $('d-up').onclick=()=>{dRev=false;renderDetail()};
@@ -1093,18 +1003,6 @@ $('d-prev').onclick=()=>{dIdx=(dIdx-1+N)%N;renderDetail();window.scrollTo(0,0)};
 $('d-next').onclick=()=>{dIdx=(dIdx+1)%N;renderDetail();window.scrollTo(0,0)};
 $('b-snd').onclick=()=>{snd=!snd;sset('of_snd',snd);paintSnd();if(!snd)ambient(false);else{sfx('tap');if(!$('s-shuffle').hidden||!$('s-count').hidden||!$('s-pick').hidden)ambient(true)}};
 $('nm').addEventListener('input',()=>sset('of_name',getName()));
-$('shm-x').onclick=closeShare;
-$('shm').addEventListener('click',e=>{if(e.target===$('shm'))closeShare()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('shm').hidden)closeShare()});
-$('shm-dl').onclick=()=>{if(!shUrl)return;const a=document.createElement('a');a.href=shUrl;a.download='orman-falcisi.png';document.body.appendChild(a);a.click();document.body.removeChild(a)};
-$('shm-share').onclick=async()=>{
-  if(!shBlob)return;
-  try{
-    const file=new File([shBlob],'orman-falcisi.png',{type:'image/png'});
-    if(navigator.canShare&&navigator.canShare({files:[file]}))await navigator.share({files:[file],title:'Orman Falcısı',text:'Benim falım'});
-    else toast('Bu tarayıcıda doğrudan paylaşım yok, İndir ile kaydet');
-  }catch(e){}
-};
 const hd=$('hold');
 hd.addEventListener('pointerdown',holdStart);
 ['pointerup','pointerleave','pointercancel'].forEach(t=>hd.addEventListener(t,holdEnd));
